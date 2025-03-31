@@ -1,2 +1,2 @@
-# ML-Library-CPP
-A minimalist ML library created for CPP lovers
+# TinyMLpp
+A minimalist ML library created for C++ lovers

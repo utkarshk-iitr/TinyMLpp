@@ -156,7 +156,6 @@ if __name__ == "__main__":
             }
         }
 
-        kmeans.plotKMeansClusters(data, cppAssignments, 3);
         // --------------------------------------------------------------------
         // 6. Report the test result.
         // --------------------------------------------------------------------
@@ -166,13 +165,18 @@ if __name__ == "__main__":
             cout << "Test FAILED: C++ and Python k-Means assignments differ." << endl;
             cout << "C++ assignments: ";
             for (int a : cppAssignments)
-                cout << a << " ";
+            cout << a << " ";
             cout << "\nPython assignments: ";
             for (int a : pyAssignments)
-                cout << a << " ";
+            cout << a << " ";
             cout << endl;
         }
 
+        // --------------------------------------------------------------------
+        // 7. Optionally, plot the clusters using matplotlibcpp.
+        // --------------------------------------------------------------------
+        kmeans.plotKMeansClusters(data, cppAssignments, 3);
+        
         // Optionally, delete the temporary Python file.
         remove("temp_kmeans.py");
         // Optionally, plot the clusters using matplotlibcpp.

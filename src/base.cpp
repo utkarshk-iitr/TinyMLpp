@@ -1,0 +1,18 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+class Model {
+    public:
+        double learningRate;
+        int epochs;
+        
+        // Constructor with default parameters for learning rate and epochs
+        Model(double lr = 0.01, int ep = 100) : learningRate(lr), epochs(ep) {}
+        
+        // Pure virtual functions to enforce implementation in derived classes
+        virtual void train(const Data &data) = 0;
+        virtual vector<double> predict(const Data &data) = 0;
+        
+        virtual ~Model() {} // Virtual destructor for safe inheritance
+};

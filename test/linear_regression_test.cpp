@@ -81,7 +81,13 @@ int main() {
         // --------------------------------------------------------------------
         // Create a LinearRegression object with learning rate = 0.01 and iterations = 1000.
         LinearRegression lr(0.01, 1000);
-        lr.train(data);
+        void* parameters = lr.train(data);
+        double* theta = static_cast<double*>(parameters);
+        cout << "C++ Linear Regression Parameters:" << endl;
+        for (size_t i = 0; i < data.features[0].size() + 1; ++i) {
+            cout << "Theta[" << i << "] = " << theta[i] << endl;
+        }
+        // Predict using the trained model.
         vector<double> cppPredictions = lr.predict(data);
 
         // --------------------------------------------------------------------
@@ -150,8 +156,13 @@ if __name__ == "__main__":
             }
             cout << endl;
         }
-
-        // Optionally, delete the temporary Python file.
+        // plot the results
+        vector<double> thetaVec(theta, theta + data.features[0].size() + 1);
+        for(auto t: thetaVec){
+            cout << t << " ";
+        }
+        lr.plotLinearRegression(data, thetaVec);
+        // delete the temporary Python file.
         remove("temp_linreg.py");
         
     } catch (const exception &e) {

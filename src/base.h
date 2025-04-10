@@ -16,9 +16,8 @@ public:
     Model(double lr = 0.01, int ep = 100) : learningRate(lr), epochs(ep) {}
 
     // Pure virtual functions to enforce implementation in derived classes.
-    virtual void train(handle::Data &data) = 0;
+    virtual void* train(handle::Data &data) = 0;
     virtual std::vector<double> predict(handle::Data &data) = 0;
-        
     virtual ~Model() {} // Virtual destructor for safe inheritance.
 };
 

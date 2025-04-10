@@ -10,8 +10,10 @@
 #include <algorithm>
 #include "base.h"             // Assumes Model is defined here.
 #include "data_handling.h"   // Assumes Data, toDouble(), etc. are defined here.
+#include "../include/matplotlibcpp.h"
 
 using namespace std;
+namespace plt = matplotlibcpp;
 
 class KMeans : public Model {
 private:
@@ -62,7 +64,7 @@ public:
      * @param data The dataset to cluster.
      * @throws runtime_error if data is empty, inconsistent, or if k is larger than the number of data points.
      */
-    void train(handle::Data &data) override {
+    void* train(handle::Data &data) override {
         size_t m = data.features.size();  // number of data points
         if (m == 0) {
             throw runtime_error("No data available for clustering.");
@@ -157,6 +159,8 @@ public:
                 break;
             }
         }
+        vector<int> params = assignments; // Return assignments as a vector of integers.
+        return static_cast<void*>(new vector<int>(params)); // Return as void pointer.
     }
 
     /**
@@ -213,6 +217,50 @@ public:
      */
     vector<int> getAssignments() {
         return assignments;
+    }
+    /**
+     * @brief Plots the clusters using matplotlibcpp.
+     * 
+     * This function assumes that the dataset has at least two features for 2D plotting.
+     * 
+     * @param data The dataset used for clustering.
+     * @param assignments The cluster assignments for each data point.
+     * @param k The number of clusters.
+     */
+    void plotKMeansClusters(handle::Data &data, vector<int> &assignments, int k) {
+        // Vectors for x and y coordinates per cluster.
+        vector<vector<double>> clusterX(k), clusterY(k);
+        size_t numPoints = data.features.size();
+        
+        // For plotting, we use the first two features from the original data.
+        // Ensure that the dataset has at least two features.
+        if (data.features.empty() || data.features[0].size() < 2) {
+            throw runtime_error("Data must have at least two features for 2D plotting.");
+        }
+        
+        for (size_t i = 0; i < numPoints; i++) {
+            double x = handle::toDouble(data.features[i][0]);
+            double y =handle::toDouble(data.features[i][1]);
+            int cluster = assignments[i];
+            clusterX[cluster].push_back(x);
+            clusterY[cluster].push_back(y);
+        }
+        
+        // Define a set of colors.
+        vector<string> colors = {"red", "blue", "green", "purple", "orange", "cyan"};
+        
+        // Plot each cluster in a different color.
+        for (int clusterID = 0; clusterID < k; clusterID++) {
+            plt::scatter(clusterX[clusterID], clusterY[clusterID], 10.0,
+                         {{"color", colors[clusterID % colors.size()]}, {"label", "Cluster " + to_string(clusterID)}});
+        }
+        
+        plt::title("K-Means Clustering (k = " + to_string(k) + ")");
+        plt::xlabel("Feature 1");
+        plt::ylabel("Feature 2");
+        plt::legend();
+        plt::grid(true);
+        plt::show();
     }
 };
 

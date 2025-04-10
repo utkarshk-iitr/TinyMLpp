@@ -7,8 +7,9 @@
 #include <stdexcept>
 #include "base.h"         
 #include "data_handling.h"
- 
+#include "../include/matplotlibcpp.h"
 using namespace handle;
+namespace plt = matplotlibcpp;
 
 class LinearRegression : public Model {
 private:
@@ -19,7 +20,7 @@ public:
 
     // Train the model using either the closed-form solution (for one feature)
     // or gradient descent (for multiple features).
-    void train(Data &data) override {
+    void* train(Data &data) override {
         size_t m = data.features.size();
         if (m == 0) {
             throw std::runtime_error("No data available");
@@ -82,6 +83,11 @@ public:
                 }
             }
         }
+        double* params = new double[theta.size()];
+        for (size_t i = 0; i < theta.size(); ++i) {
+            params[i] = theta[i];
+        }
+        return static_cast<void*>(params); // Return the parameters as a void pointer.
     }
 
     // Predict outcomes using the trained model.
@@ -99,7 +105,39 @@ public:
         }
         return predictions;
     }
-    
+
+    void plotLinearRegression(Data &data, vector<double>& theta) {
+        // For plotting, we assume a single feature.
+        // if (data.features.empty() || data.features[0].size() != 1) {
+        //     throw runtime_error("Linear regression plot requires exactly one feature per data point.");
+        // }
+        vector<double> x_data, y_data;
+        for (size_t i = 0; i < data.features.size(); i++) {
+            double x = toDouble(data.features[i][0]);
+            double y = toDouble(data.target[i]);
+            x_data.push_back(x);
+            y_data.push_back(y);
+        }
+        // Determine the range for x to plot the regression line.
+        double x_min = *min_element(x_data.begin(), x_data.end());
+        double x_max = *max_element(x_data.begin(), x_data.end());
+        int num_points = 100;
+        vector<double> x_line(num_points), y_line(num_points);
+        double step = (x_max - x_min) / (num_points - 1);
+        for (int i = 0; i < num_points; i++) {
+            x_line[i] = x_min + i * step;
+            // For simple linear regression, predicted y = theta0 + theta1 * x.
+            y_line[i] = theta[0] + theta[1] * x_line[i];
+        }
+        plt::scatter(x_data, y_data, 10.0, {{"color", "blue"}, {"label", "Data Points"}});
+        plt::plot(x_line, y_line, {{"color", "red"}, {"label", "Regression Line"}});
+        plt::xlabel("Feature 1");
+        plt::ylabel("Target");
+        plt::title("Linear Regression Fit");
+        plt::legend();
+        plt::grid(true);
+        plt::show();
+    }
 };
 
 #endif // LINEAR_REGRESSION_H

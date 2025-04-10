@@ -1,4 +1,3 @@
-// test_ml.cpp
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -10,6 +9,7 @@
 #include <cstdlib>
 #include "../src/data_handling.h"  // Contains the Data definition and readCSV(), toDouble(), etc.
 #include "../src/k_means_clustering.cpp"         // Contains the KMeans class
+
 using namespace std;
 
 /**
@@ -156,6 +156,7 @@ if __name__ == "__main__":
             }
         }
 
+        kmeans.plotKMeansClusters(data, cppAssignments, 3);
         // --------------------------------------------------------------------
         // 6. Report the test result.
         // --------------------------------------------------------------------
@@ -174,7 +175,7 @@ if __name__ == "__main__":
 
         // Optionally, delete the temporary Python file.
         remove("temp_kmeans.py");
-        
+        // Optionally, plot the clusters using matplotlibcpp.
     } catch (const exception &e) {
         cerr << "Test failed: " << e.what() << endl;
         return 1;

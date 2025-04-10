@@ -10,6 +10,7 @@
 #include "data_handling.cpp" // Assumes Data, toDouble(), and computeLogLoss() are defined here
 
 using namespace std;
+using namespace handle;
 
 class LogisticRegression : public Model {
 private:
@@ -25,7 +26,7 @@ public:
     LogisticRegression(double lr = 0.01, int ep = 1000) : Model(lr, ep) {}
 
     // Train the logistic regression model using gradient descent.
-    void train(const Data &data) override {
+    void train(Data &data) override {
         size_t m = data.features.size();
         if (m == 0) {
             throw runtime_error("No data available");
@@ -66,7 +67,7 @@ public:
 
     // Predict outcomes using the trained logistic regression model.
     // Returns the predicted probability for each example.
-    vector<double> predict(const Data &data) override {
+    vector<double> predict(Data &data) override {
         size_t m = data.features.size();
         size_t n = data.features[0].size();
         vector<double> predictions(m, 0.0);

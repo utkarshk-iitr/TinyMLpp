@@ -9,7 +9,7 @@
 #include <cfloat>
 #include <algorithm>
 #include "base.h"             // Assumes Model is defined here.
-#include "data_handling.cpp"   // Assumes Data, toDouble(), etc. are defined here.
+#include "data_handling.h"   // Assumes Data, toDouble(), etc. are defined here.
 
 using namespace std;
 
@@ -28,7 +28,7 @@ private:
      * @param b Second point as a vector of doubles.
      * @return The Euclidean distance.
      */
-    double euclideanDistance(const vector<double>& a, const vector<double>& b) {
+    double euclideanDistance(vector<double>& a, vector<double>& b) {
         double sum = 0.0;
         for (size_t i = 0; i < a.size(); i++) {
             double diff = a[i] - b[i];
@@ -62,7 +62,7 @@ public:
      * @param data The dataset to cluster.
      * @throws runtime_error if data is empty, inconsistent, or if k is larger than the number of data points.
      */
-    void train(const Data &data) override {
+    void train(handle::Data &data) override {
         size_t m = data.features.size();  // number of data points
         if (m == 0) {
             throw runtime_error("No data available for clustering.");
@@ -80,10 +80,11 @@ public:
             }
             // Convert the feature columns.
             for (size_t j = 0; j < originalDim; j++) {
-                points[i][j] = toDouble(data.features[i][j]);
+                std::string temp = data.features[i][j];
+                points[i][j] = handle::toDouble(temp);
             }
             // Append the target column (treated as a feature) at the end.
-            points[i][dim - 1] = toDouble(data.target[i]);
+            points[i][dim - 1] = handle::toDouble(data.target[i]);
         }
         
         // Ensure that k is not greater than the number of points.
@@ -168,7 +169,7 @@ public:
      * @param data The dataset for which cluster assignments are required.
      * @return A vector of doubles, where each value is the cluster index assigned to that data point.
      */
-    vector<double> predict(const Data &data) override {
+    vector<double> predict(handle::Data &data) override {
         size_t m = data.features.size();
         if (m == 0) {
             throw runtime_error("No data available for prediction.");
@@ -185,9 +186,9 @@ public:
                 throw runtime_error("Inconsistent feature dimensions in data.");
             }
             for (size_t j = 0; j < originalDim; j++) {
-                point[j] = toDouble(data.features[i][j]);
+                point[j] = handle::toDouble(data.features[i][j]);
             }
-            point[dim - 1] = toDouble(data.target[i]);
+            point[dim - 1] = handle::toDouble(data.target[i]);
             
             // Assign the point to the nearest centroid.
             double minDist = DBL_MAX;
@@ -210,7 +211,7 @@ public:
      * 
      * @return A vector of integers, each in the range [0, k-1], representing cluster assignments.
      */
-    vector<int> getAssignments() const {
+    vector<int> getAssignments() {
         return assignments;
     }
 };

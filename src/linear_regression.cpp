@@ -6,7 +6,9 @@
 #include <vector>
 #include <stdexcept>
 #include "base.h"         
-#include "data_handling.h" 
+#include "data_handling.h"
+ 
+using namespace handle;
 
 class LinearRegression : public Model {
 private:
@@ -17,7 +19,7 @@ public:
 
     // Train the model using either the closed-form solution (for one feature)
     // or gradient descent (for multiple features).
-    void train(const Data &data) override {
+    void train(Data &data) override {
         size_t m = data.features.size();
         if (m == 0) {
             throw std::runtime_error("No data available");
@@ -83,7 +85,7 @@ public:
     }
 
     // Predict outcomes using the trained model.
-    std::vector<double> predict(const Data &data) override {
+    std::vector<double> predict(Data &data) override {
         size_t m = data.features.size();
         size_t n = data.features[0].size();
         std::vector<double> predictions(m, 0.0);
@@ -97,6 +99,7 @@ public:
         }
         return predictions;
     }
+    
 };
 
 #endif // LINEAR_REGRESSION_H

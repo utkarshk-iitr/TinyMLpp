@@ -5,20 +5,14 @@
 #include <iomanip>
 #include <cfloat>
 #include <cmath>
+#include "data_handling.h"
 
 using namespace std;
-
-// Container for data: headers, features and target vector.
-class Data
+namespace handle
 {
-public:
-    vector<string> header;           // Column names (last column is the target name)
-    vector<vector<string>> features; // All feature values as strings
-    vector<string> target;           // Target values as strings
-};
 
 // Helper function to trim whitespace from both ends of a string.
-string trim(const string &s)
+string trim(string &s)
 {
     size_t start = s.find_first_not_of(" \t\n\r");
     size_t end = s.find_last_not_of(" \t\n\r");
@@ -26,13 +20,13 @@ string trim(const string &s)
 }
 
 // Helper function to convert string to double.
-double toDouble(const string &s)
+double toDouble(string &s)
 {
     try
     {
         return stod(s);
     }
-    catch (const invalid_argument &)
+    catch (invalid_argument &)
     {
         throw runtime_error("Conversion error: '" + s + "' is not a valid numeric value.");
     }
@@ -41,7 +35,7 @@ double toDouble(const string &s)
 // Read data from a CSV file.
 // Assumes that the first row contains headers, and each subsequent row contains:
 // feature1, feature2, ..., featureN, target
-Data readCSV(const string &filename)
+Data readCSV(string &filename)
 {
     Data data;
     ifstream file(filename);
@@ -77,7 +71,7 @@ Data readCSV(const string &filename)
 }
 
 // Function to compute maximum width for each column (features + target).
-vector<size_t> computeColumnWidths(const Data &data)
+vector<size_t> computeColumnWidths(Data &data)
 {
     size_t numCols = data.header.size();
     vector<size_t> colWidths(numCols, 0);
@@ -90,7 +84,7 @@ vector<size_t> computeColumnWidths(const Data &data)
     // Update widths for each row.
     for (size_t i = 0; i < data.features.size(); i++)
     {
-        const auto &row = data.features[i];
+        auto &row = data.features[i];
         for (size_t j = 0; j < row.size(); j++)
         {
             colWidths[j] = max(colWidths[j], row[j].length());
@@ -102,7 +96,7 @@ vector<size_t> computeColumnWidths(const Data &data)
 }
 
 // Function to display the dataset like a DataFrame with row numbers.
-void displayDataFrame(const Data &data)
+void displayDataFrame(Data &data)
 {
     vector<size_t> colWidths = computeColumnWidths(data);
     size_t numCols = data.header.size();
@@ -135,7 +129,7 @@ void displayDataFrame(const Data &data)
     for (size_t i = 0; i < data.features.size(); i++)
     {
         cout << setw(rowNumberWidth + 2) << left << to_string(i + 1);
-        const auto &row = data.features[i];
+        auto &row = data.features[i];
         for (size_t j = 0; j < row.size(); j++)
         {
             cout << setw(colWidths[j] + 2) << left << row[j];
@@ -200,8 +194,7 @@ void standardize(Data &data)
         for (size_t i = 0; i < m; i++)
         {
             double value = toDouble(data.features[i][j]);
-            stddev[j] +=
-                (value - mean[j], 2);
+            stddev[j] += pow(value - mean[j], 2);
         }
         stddev[j] = sqrt(stddev[j] / m);
     }
@@ -219,7 +212,7 @@ void standardize(Data &data)
 }
 
 // Compute Mean Squared Error (Linear Regression cost).
-double computeMeanSquaredError(const Data &data, const vector<double> &theta)
+double computeMeanSquaredError(Data &data, vector<double> &theta)
 {
     size_t m = data.features.size();
     size_t n = data.features[0].size();
@@ -241,12 +234,12 @@ double computeMeanSquaredError(const Data &data, const vector<double> &theta)
 }
 
 // Compute Log Loss (Logistic Regression cost).
-double computeLogLoss(const Data &data, const vector<double> &theta)
+double computeLogLoss(Data &data, vector<double> &theta)
 {
     size_t m = data.features.size();
     size_t n = data.features[0].size();
     double loss = 0.0;
-    const double eps = 1e-15; // to avoid log(0)
+    double eps = 1e-15; // to avoid log(0)
     for (size_t i = 0; i < m; i++)
     {
         double z = theta[0]; // intercept
@@ -261,4 +254,5 @@ double computeLogLoss(const Data &data, const vector<double> &theta)
     }
     loss /= m;
     return loss;
+}
 }

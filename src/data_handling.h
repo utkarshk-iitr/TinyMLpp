@@ -14,6 +14,9 @@
 
 using namespace std;
 
+namespace handle
+{
+    
 /**
  * @brief Container for data: headers, features, and target vector.
  *
@@ -34,7 +37,7 @@ public:
  * @param s The input string.
  * @return A trimmed version of the string.
  */
-string trim(const string &s);
+string trim(string &s);
 
 /**
  * @brief Converts a string to a double.
@@ -43,7 +46,7 @@ string trim(const string &s);
  * @return The converted double value.
  * @throws runtime_error if the conversion fails.
  */
-double toDouble(const string &s);
+double toDouble(string &s);
 
 /**
  * @brief Reads data from a CSV file.
@@ -54,7 +57,7 @@ double toDouble(const string &s);
  * @param filename The name of the CSV file.
  * @return A Data object containing the headers, features, and target values.
  */
-Data readCSV(const string &filename);
+Data readCSV(string &filename);
 
 /**
  * @brief Computes the maximum width for each column (features + target).
@@ -62,14 +65,14 @@ Data readCSV(const string &filename);
  * @param data The Data object.
  * @return A vector of size_t representing the maximum width for each column.
  */
-vector<size_t> computeColumnWidths(const Data &data);
+vector<size_t> computeColumnWidths(Data &data);
 
 /**
  * @brief Displays the dataset like a DataFrame with row numbers.
  * 
  * @param data The Data object to display.
  */
-void displayDataFrame(const Data &data);
+void displayDataFrame(Data &data);
 
 /**
  * @brief Applies Min-Max Normalization to the data.
@@ -97,7 +100,7 @@ void standardize(Data &data);
  * @param theta The model parameters (theta[0] is the intercept; theta[1..n] are feature weights).
  * @return The Mean Squared Error.
  */
-double computeMeanSquaredError(const Data &data, const vector<double> &theta);
+double computeMeanSquaredError(Data &data, vector<double> &theta);
 
 /**
  * @brief Computes the Log Loss (cost) for Logistic Regression.
@@ -106,6 +109,7 @@ double computeMeanSquaredError(const Data &data, const vector<double> &theta);
  * @param theta The model parameters (theta[0] is the intercept; theta[1..n] are feature weights).
  * @return The computed Log Loss value.
  */
-double computeLogLoss(const Data &data, const vector<double> &theta);
+double computeLogLoss(Data &data, vector<double> &theta);
 
 #endif // DATA_HANDLING_H
+}

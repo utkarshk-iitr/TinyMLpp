@@ -46,7 +46,7 @@ public:
                 numerator += (x - meanX) * (y - meanY);
                 denominator += (x - meanX) * (x - meanX);
             }
-            double theta1 = (denominator == 0 ? 0 : numerator / denominator);
+            double theta1 = (denominator == 0 ? 1e9 : numerator / denominator);
             double theta0 = meanY - theta1 * meanX;
             theta = { theta0, theta1 };
 

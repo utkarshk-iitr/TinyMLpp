@@ -107,8 +107,7 @@ public:
     }
 
     void plotLinearRegression(Data &data, vector<double>& theta) {
-        // For plotting, we assume a single feature. In case there are multiple features, we can use dimensionality reduction techniques like PCA.
-        //For now, we simply take the first feature.
+        // For plotting, we have assumed a single feature for now.
         vector<double> x_data, y_data;
         for (size_t i = 0; i < data.features.size(); i++) {
             double x = toDouble(data.features[i][0]);

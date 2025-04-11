@@ -7,8 +7,8 @@
 #include <stdexcept>
 #include <algorithm>
 #include <map>
-#include "base.h"             // Assumes Model is defined here
-#include "data_handling.cpp"   // Assumes Data, toDouble(), etc. are defined here
+#include "base.h"             // Assuming Model is defined here
+#include "data_handling.cpp"   // Assuming Data, toDouble(), etc. are defined here
 
 using namespace std;
 

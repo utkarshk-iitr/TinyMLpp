@@ -10,7 +10,12 @@
 #include <algorithm>
 #include "base.h"             // Assumes Model is defined here.
 #include "data_handling.h"   // Assumes Data, toDouble(), etc. are defined here.
-#include "../include/matplotlibcpp.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
+#pragma GCC diagnostic pop
+
 
 using namespace std;
 namespace plt = matplotlibcpp;

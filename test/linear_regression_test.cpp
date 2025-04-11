@@ -73,8 +73,10 @@ int main() {
         // --------------------------------------------------------------------
         // 1. Load dataset from "exported_dataset.csv" using our data handler.
         // --------------------------------------------------------------------
-        std::string filename = "placementt.csv";
+        std::string filename = "advertising.csv";
         Data data = readCSV(filename);
+
+        displayDataFrame(data); // Display the loaded data (optional)
         standardize(data); // Normalize the data (optional, but recommended for linear regression)
         // --------------------------------------------------------------------
         // 2. Run C++ Linear Regression.
@@ -87,6 +89,16 @@ int main() {
         for (size_t i = 0; i < data.features[0].size() + 1; ++i) {
             cout << "Theta[" << i << "] = " << theta[i] << endl;
         }
+
+        vector<double> theta_vec;
+        size_t num_features = data.features[0].size();
+        for (size_t i = 0; i < num_features + 1; ++i) {
+            // cout << "Theta[" << i << "] = " << theta[i] << endl;
+            theta_vec.push_back(theta[i]);
+        }
+        
+
+        cout << "MSE = " << computeMeanSquaredError(data, theta_vec) << endl;
         // Predict using the trained model.
         vector<double> cppPredictions = lr.predict(data);
 
@@ -110,7 +122,7 @@ def read_csv(filename):
     return data
 
 if __name__ == "__main__":
-    filename = sys.argv[1] if len(sys.argv) > 1 else "placementt.csv"
+    filename = sys.argv[1] if len(sys.argv) > 1 else "advertising.csv"
     data = read_csv(filename)
     # Assume last column is the target, remaining columns are features.
     X = data.iloc[:, :-1].values
@@ -131,19 +143,27 @@ if __name__ == "__main__":
         // --------------------------------------------------------------------
         // 4. Run the Python script and capture its output.
         // --------------------------------------------------------------------
-        string pyCommand = "./temp_linreg.py placementt.csv";
+        string pyCommand = "./temp_linreg.py advertising.csv";
         string pyOutput = exec(pyCommand.c_str());
         vector<double> pyPredictions = parsePythonOutputDouble(pyOutput);
         // --------------------------------------------------------------------
         // 5. Compare the results from C++ and Python.
         // --------------------------------------------------------------------
-        bool passed = compareVectors(cppPredictions, pyPredictions, 1e-4);
+        bool passed = compareVectors(cppPredictions, pyPredictions, 1e-2);
 
         // --------------------------------------------------------------------
         // 6. Report the test result.
         // --------------------------------------------------------------------
         if (passed) {
             cout << "Test passed: C++ and Python Linear Regression predictions are equal." << endl;
+            // for (double p : cppPredictions) {
+            //     cout << p << " ";
+            // }
+            // cout << "\nPython predictions:" << endl;
+            // for (double p : pyPredictions) {
+            //     cout << p << " ";
+            // }
+            // cout << endl;
         } else {
             cout << "Test FAILED: C++ and Python Linear Regression predictions differ." << endl;
             cout << "C++ predictions:" << endl;

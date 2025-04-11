@@ -67,7 +67,11 @@ int main() {
         for (double d : cppAssignmentsDouble) {
             cppAssignments.push_back(static_cast<int>(d));
         }
-
+        // Output the C++ cluster assignments.
+        // cout << "C++ k-Means assignments: ";
+        // for (int a : cppAssignments)
+        //     cout << a << " ";
+        // cout << endl;
         // --------------------------------------------------------------------
         // 3. Write a temporary Python script to perform k-Means clustering.
         // --------------------------------------------------------------------

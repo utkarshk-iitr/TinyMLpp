@@ -1,3 +1,4 @@
+
 #pragma once
 #ifndef DATA_HANDLING_H
 #define DATA_HANDLING_H
@@ -113,3 +114,5 @@ double computeLogLoss(Data &data, vector<double> &theta);
 
 #endif // DATA_HANDLING_H
 }
+
+

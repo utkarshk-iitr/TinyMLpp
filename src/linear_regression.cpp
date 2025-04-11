@@ -7,7 +7,12 @@
 #include <stdexcept>
 #include "base.h"         
 #include "data_handling.h"
-#include "../include/matplotlibcpp.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
+#pragma GCC diagnostic pop
+
 using namespace handle;
 namespace plt = matplotlibcpp;
 

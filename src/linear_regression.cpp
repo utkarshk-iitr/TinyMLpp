@@ -1,3 +1,4 @@
+
 #ifndef LINEAR_REGRESSION_H
 #define LINEAR_REGRESSION_H
 
@@ -6,14 +7,14 @@
 #include <stdexcept>
 #include "base.h"         
 #include "data_handling.h"
+#include "gnuplot-iostream.h" 
+#include <algorithm>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
 #pragma GCC diagnostic pop
 
 using namespace handle;
-namespace plt = matplotlibcpp;
 
 class LinearRegression : public Model {
 private:
@@ -111,33 +112,47 @@ public:
     }
 
     void plotLinearRegression(Data &data, vector<double>& theta) {
-        // For plotting, we have assumed a single feature for now.
-        vector<double> x_data, y_data;
-        for (size_t i = 0; i < data.features.size(); i++) {
+        Gnuplot gp;
+    
+        vector<pair<double, double>> data_points;
+        vector<double> y_vals;
+        for (size_t i = 0; i < data.features.size(); ++i) {
             double x = toDouble(data.features[i][0]);
             double y = toDouble(data.target[i]);
-            x_data.push_back(x);
-            y_data.push_back(y);
+            data_points.emplace_back(x, y);
+            y_vals.push_back(y);
         }
-        // Determine the range for x to plot the regression line.
-        double x_min = *min_element(x_data.begin(), x_data.end());
-        double x_max = *max_element(x_data.begin(), x_data.end());
+    
+        // Determine x range for regression line
+        double x_min = min_element(data_points.begin(), data_points.end())->first;
+        double x_max = max_element(data_points.begin(), data_points.end())->first;
+    
+        // Determine y range with padding
+        double y_min = *min_element(y_vals.begin(), y_vals.end());
+        double y_max = *max_element(y_vals.begin(), y_vals.end());
+        y_max *= 1.3;
+
         int num_points = 100;
-        vector<double> x_line(num_points), y_line(num_points);
         double step = (x_max - x_min) / (num_points - 1);
-        for (int i = 0; i < num_points; i++) {
-            x_line[i] = x_min + i * step;
-            // For simple linear regression, predicted y = theta0 + theta1 * x.
-            y_line[i] = theta[0] + theta[1] * x_line[i];
+        vector<pair<double, double>> line_points;
+        for (int i = 0; i < num_points; ++i) {
+            double x = x_min + i * step;
+            double y = theta[0] + theta[1] * x;
+            line_points.emplace_back(x, y);
         }
-        plt::scatter(x_data, y_data, 10.0, {{"color", "blue"}, {"label", "Data Points"}});
-        plt::plot(x_line, y_line, {{"color", "red"}, {"label", "Regression Line"}});
-        plt::xlabel("Feature 1");
-        plt::ylabel("Target");
-        plt::title("Linear Regression Fit");
-        plt::legend();
-        plt::grid(true);
-        plt::show();
+    
+        // Plot settings
+        gp << "set title 'Linear Regression Fit'\n";
+        gp << "set xlabel 'Feature 1'\n";
+        gp << "set ylabel 'Target'\n";
+        gp << "set grid\n";
+        gp << "set key top right opaque box font ',8'\n";
+        gp << "set yrange [" << y_min << ":" << y_max << "]\n";
+        gp << "plot '-' with points pointtype 7 lc rgb 'blue' title 'Data Points', "
+              "'-' with lines lw 3 lc rgb 'red' title 'Regression Line'\n";
+    
+        gp.send1d(data_points);
+        gp.send1d(line_points);
     }
 };
 

@@ -1,4 +1,3 @@
-#pragma once
 #ifndef LOGISTIC_REGRESSION_H
 #define LOGISTIC_REGRESSION_H
 
@@ -7,7 +6,7 @@
 #include <stdexcept>
 #include <cmath>
 #include "base.h"           // Assumes Model is defined in model.h
-#include "data_handling.cpp" // Assumes Data, toDouble(), and computeLogLoss() are defined here
+#include "data_handling.h" // Assumes Data, toDouble(), and computeLogLoss() are defined here
 
 using namespace std;
 using namespace handle;
@@ -26,7 +25,7 @@ public:
     LogisticRegression(double lr = 0.01, int ep = 1000) : Model(lr, ep) {}
 
     // Train the logistic regression model using gradient descent.
-    void train(Data &data) override {
+    void* train(Data &data) override {
         size_t m = data.features.size();
         if (m == 0) {
             throw runtime_error("No data available");

@@ -1,16 +1,22 @@
-#pragma once
-#ifndef KNN_H
-#define KNN_H
+#ifndef KMEANS_H
+#define KMEANS_H
 
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <cmath>
+#include <cfloat>
 #include <algorithm>
-#include <map>
-#include "base.h"             // Assuming Model is defined here
-#include "data_handling.cpp"   // Assuming Data, toDouble(), etc. are defined here
+#include "base.h"             // Assumes Model is defined here.
+#include "data_handling.h"   // Assumes Data, toDouble(), etc. are defined here.
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
+#pragma GCC diagnostic pop
 
 using namespace std;
+using namespace handle;
 
 class KNN : public Model {
 private:
@@ -37,8 +43,9 @@ public:
      * 
      * @param data The training data.
      */
-    void train(const Data &data) override {
+    void* train(Data &data) override {
         trainingData = data;
+        return nullptr;
     }
 
     /**
@@ -103,11 +110,11 @@ public:
      * @param data A Data object containing query examples.
      * @return A vector of doubles representing the predicted labels.
      */
-    vector<double> predict(const Data &data) override {
+    vector<double> predict(Data &data) {
         vector<double> predictions;
-        for (const auto &feat : data.features) {
+        for (auto &feat : data.features) {
             vector<double> query;
-            for (const auto &val : feat) {
+            for (auto &val : feat) {
                 query.push_back(toDouble(val));
             }
             string label = predictOne(query);
@@ -128,11 +135,11 @@ public:
      * @param data A Data object containing query examples.
      * @return A vector of strings representing the predicted labels.
      */
-    vector<string> predictLabel(const Data &data) {
+    vector<string> predictLabel(Data &data) {
         vector<string> predictions;
-        for (const auto &feat : data.features) {
+        for (auto &feat : data.features) {
             vector<double> query;
-            for (const auto &val : feat) {
+            for (auto &val : feat) {
                 query.push_back(toDouble(val));
             }
             predictions.push_back(predictOne(query));

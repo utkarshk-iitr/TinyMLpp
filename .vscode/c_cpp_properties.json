@@ -7,8 +7,12 @@
                 "${workspaceFolder}/include",
                 "/usr/local/include",
                 "/usr/include",
+                "/usr/include/x86_64-linux-gnu/qt5",
+                "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+                "/usr/include/x86_64-linux-gnu/qt5/QtCore",
                 "/usr/include/python3.12",
-                "/usr/lib/python3/dist-packages/numpy/core/include" 
+                "/usr/include/python3.10",
+                "/usr/lib/python3/dist-packages/numpy/core/include"
             ],
             "defines": [],
             "compilerPath": "/usr/local/bin/clang",

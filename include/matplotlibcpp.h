@@ -2,6 +2,8 @@
 
 // Python headers must be included before any system headers, since
 // they define _POSIX_C_SOURCE
+#undef slots
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include <vector>

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef KMEANS_H
 #define KMEANS_H
 
@@ -8,16 +9,17 @@
 #include <cfloat>
 #include <algorithm>
 #include "base.h"             // Assumes Model is defined here.
-#include "data_handling.h"   // Assumes Data, toDouble(), etc. are defined here.
+#include "data_handling.h"
+#include "gnuplot-iostream.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
+// #include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
 #pragma GCC diagnostic pop
 
 
 using namespace std;
-namespace plt = matplotlibcpp;
+// namespace plt = matplotlibcpp;
 
 class KMeans : public Model {
 private:
@@ -232,40 +234,48 @@ public:
      * @param k The number of clusters.
      */
     void plotKMeansClusters(handle::Data &data, vector<int> &assignments, int k) {
-        // Vectors for x and y coordinates per cluster.
-        vector<vector<double>> clusterX(k), clusterY(k);
-        size_t numPoints = data.features.size();
-        
-        // For plotting, we use the first two features from the original data.
-        // Ensure that the dataset has at least two features.
         if (data.features.empty() || data.features[0].size() < 2) {
             throw runtime_error("Data must have at least two features for 2D plotting.");
         }
-        
-        for (size_t i = 0; i < numPoints; i++) {
+    
+        Gnuplot gp;
+        vector<vector<pair<double, double>>> clusterPoints(k);
+        vector<double> y_vals;
+        for (size_t i = 0; i < data.features.size(); ++i) {
             double x = handle::toDouble(data.features[i][0]);
-            double y =handle::toDouble(data.features[i][1]);
+            double y = handle::toDouble(data.features[i][1]);
             int cluster = assignments[i];
-            clusterX[cluster].push_back(x);
-            clusterY[cluster].push_back(y);
+            if (cluster >= k || cluster < 0) throw runtime_error("Invalid cluster index.");
+            clusterPoints[cluster].emplace_back(x, y);
+            y_vals.push_back(y);
         }
-        
-        // Define a set of colors.
-        vector<string> colors = {"red", "blue", "green", "purple", "orange", "cyan"};
-        
-        // Plot each cluster in a different color.
-        for (int clusterID = 0; clusterID < k; clusterID++) {
-            plt::scatter(clusterX[clusterID], clusterY[clusterID], 10.0,
-                         {{"color", colors[clusterID % colors.size()]}, {"label", "Cluster " + to_string(clusterID)}});
+
+        double y_min = *min_element(y_vals.begin(), y_vals.end());
+        double y_max = *max_element(y_vals.begin(), y_vals.end());
+        y_max *= 1.2;
+    
+        vector<string> colors = {
+            "red", "blue", "green", "purple", "orange", "cyan",
+            "magenta", "brown", "grey", "pink"
+        };
+
+        gp << "set title 'K-Means Clustering (k = " << k << ")'\n";
+        gp << "set xlabel 'Feature 1'\n";
+        gp << "set ylabel 'Feature 2'\n";
+        gp << "set grid\n";
+        gp << "set key top right opaque box font ',8'\n";
+        gp << "set yrange [" << y_min << ":" << y_max << "]\n";
+        gp << "plot ";
+        for (int i = 0; i < k; ++i) {
+            gp << "'-' with points pointtype 7 lc rgb '" << colors[i % colors.size()] << "' title 'Cluster " << i << "'";
+            if (i != k - 1) gp << ", ";
+            else gp << "\n";
         }
-        
-        plt::title("K-Means Clustering (k = " + to_string(k) + ")");
-        plt::xlabel("Feature 1");
-        plt::ylabel("Feature 2");
-        plt::legend();
-        plt::grid(true);
-        plt::show();
+        for (int i = 0; i < k; ++i) {
+            gp.send1d(clusterPoints[i]);
+        }
     }
 };
+
 
 #endif // KMEANS_H

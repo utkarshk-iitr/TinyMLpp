@@ -11,7 +11,7 @@
 #include <cmath>
 #include <string>
 #include "../src/data_handling.h"   // Data definitions and utilities
-#include "../src/decision_tree.h"   // DecisionTree definitions and gnuplot plotting
+#include "../src/decision_tree.cpp"   // DecisionTree definitions and gnuplot plotting
 
 using namespace std;
 using namespace handle;
@@ -56,7 +56,7 @@ int main() {
 
         // 2. Train C++ DecisionTree.
         DecisionTree dt(/*maxDepth=*/5, /*minSamplesSplit=*/2);
-        dt.train(data);
+        auto root = dt.train(data);
         vector<double> cppPreds = dt.predict(data);
 
         // 3. Write Python test script.
@@ -99,8 +99,7 @@ if __name__ == '__main__':
         }
 
         // 6. Plot the tree
-        dt.plotTree(true);                     // interactive
-        // dt.plotTree(false, "tree.png");    // or save PNG
+        dt.plotTree(root);
 
         // 7. Cleanup.
         remove("temp_dectree.py");

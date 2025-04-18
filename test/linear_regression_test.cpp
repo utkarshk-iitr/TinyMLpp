@@ -1,5 +1,3 @@
-// test_linear_regression.cpp
-
 #include <iostream>
 #include <fstream>
 #include <sstream>

@@ -51,12 +51,15 @@ int main() {
         // 1. Load and normalize in C++
         string filename = "placementt.csv";
         Data data = readCSV(filename);
-        // (optional) displayDataFrame(data);
+        displayDataFrame(data);
         standardize(data);
 
         // 2. C++ Logistic Regression
         LogisticRegression lr(0.01, 1000);
-        void* raw_params = lr.train(data);
+        auto [trainData, testData] = train_test_split(data, 0.2, 42);
+        cout << "Train set size: " << trainData.features.size() << endl;
+        cout << "Test set size: " << testData.features.size() << endl;
+        void* raw_params = lr.train(trainData); // Train the model
         double* cppThetaArr = static_cast<double*>(raw_params);
         size_t n = data.features[0].size();
 
@@ -66,7 +69,7 @@ int main() {
             cppTheta[i] = cppThetaArr[i];
             cout << " θ[" << i << "] = " << cppTheta[i] << endl;
         }
-        vector<double> cppProbs = lr.predict(data);
+        vector<double> cppProbs = lr.predict(testData);
 
         // 3. Write Python script with gradient‑descent LR
         ofstream py("temp_logreg.py");
@@ -140,7 +143,7 @@ if __name__ == "__main__":
         // for (auto v : pyTheta) cout << v << " ";
         // cout << endl;
         
-        lr.plotLR(data, cppTheta);
+        lr.plotLR(testData, cppTheta);
         // 6. Compare probabilities
         bool probMatch = compareVectors(cppProbs, pyProbs, 1e-3);
         cout << (probMatch ? "Probabilities match." : "Probabilities differ!") << endl;

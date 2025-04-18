@@ -15,7 +15,6 @@ using namespace handle;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-// #include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
 #pragma GCC diagnostic pop
 
 class DecisionTree : public Model {

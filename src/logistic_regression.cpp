@@ -6,7 +6,9 @@
 #include <stdexcept>
 #include <cmath>
 #include "base.h"           // Assumes Model is defined in model.h
-#include "data_handling.h" // Assumes Data, toDouble(), and computeLogLoss() are defined here
+#include "data_handling.h"
+#include "gnuplot-iostream.h" // For plotting
+#include <utility>         // For std::pair
 
 using namespace std;
 using namespace handle;
@@ -87,6 +89,48 @@ public:
         }
         return predictions;
     }
+
+    void plotLR(Data& data,vector<double>& theta) {
+        Gnuplot gp;
+
+        vector<pair<double, double>> class0;
+        vector<pair<double, double>> class1;
+
+        // Separate data points based on class label
+        for (size_t i = 0; i < data.features.size(); ++i) {
+            double x1 = toDouble(data.features[i][0]);
+            double x2 = toDouble(data.features[i][1]);
+            double label = toDouble(data.target[i]);
+            if (label == 0)
+                class0.emplace_back(x1, x2);
+            else
+                class1.emplace_back(x1, x2);
+        }
+
+        // Prepare decision boundary
+        // x2 = -(theta0 + theta1*x1) / theta2
+        vector<pair<double, double>> boundary;
+        double x_min = -10, x_max = 10; // or use actual min/max from data
+
+        for (double x1 = x_min; x1 <= x_max; x1 += 0.1) {
+            double x2 = -(theta[0] + theta[1]*x1) / theta[2];
+            boundary.emplace_back(x1, x2);
+        }
+
+        // Plot
+        gp << "set title 'Logistic Regression'\n";
+        gp << "set xlabel 'x1'\n";
+        gp << "set ylabel 'x2'\n";
+        gp << "set key outside\n";
+        gp << "plot '-' with points pointtype 7 lc rgb 'red' title 'Class 0', "
+            "'-' with points pointtype 7 lc rgb 'blue' title 'Class 1', "
+            "'-' with lines lt rgb 'black' lw 2 title 'Decision Boundary'\n";
+
+        gp.send1d(class0);
+        gp.send1d(class1);
+        gp.send1d(boundary);
+    }   
+
 };
 
 #endif // LOGISTIC_REGRESSION_H

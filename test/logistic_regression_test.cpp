@@ -139,7 +139,8 @@ if __name__ == "__main__":
         cout << "\nPy  θ: ";
         for (auto v : pyTheta) cout << v << " ";
         cout << endl;
-
+        
+        lr.plotLR(data, cppTheta);
         // 6. Compare probabilities
         bool probMatch = compareVectors(cppProbs, pyProbs, 1e-3);
         cout << (probMatch ? "Probabilities match." : "Probabilities differ!") << endl;

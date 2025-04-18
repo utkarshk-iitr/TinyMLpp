@@ -95,7 +95,7 @@ public:
 
         vector<pair<double, double>> class0;
         vector<pair<double, double>> class1;
-        vector<double> y_vals;
+        vector<double> y_vals,x_vals;
 
         // Separate data points based on class label
         for (size_t i = 0; i < data.features.size(); ++i) {
@@ -107,12 +107,16 @@ public:
             else
                 class1.emplace_back(x1, x2);
             y_vals.push_back(x2);
+            x_vals.push_back(x1);
         }
 
         // Prepare decision boundary
         // x2 = -(theta0 + theta1*x1) / theta2
         vector<pair<double, double>> boundary;
-        double x_min = -10, x_max = 10; // or use actual min/max from data
+        double x_min = *min_element(x_vals.begin(), x_vals.end()); // or use actual min/max from data
+        double x_max = *max_element(x_vals.begin(), x_vals.end());
+        x_max *= 1.3; 
+        x_min *= 1.3;
 
         for (double x1 = x_min; x1 <= x_max; x1 += 0.1) {
             double x2 = -(theta[0] + theta[1]*x1) / theta[2];
@@ -124,12 +128,14 @@ public:
         y_max *= 1.3; 
         y_min *= 1.3;
         
+
         gp << "set title 'Logistic Regression'\n";
         gp << "set xlabel 'x1'\n";
         gp << "set ylabel 'x2'\n";
         gp << "set grid\n";
         gp << "set key top right opaque box font ',8'\n";
         gp << "set yrange [" << y_min << ":" << y_max << "]\n";
+        gp << "set xrange [" << x_min << ":" << x_max << "]\n";
         gp << "plot '-' with points pointtype 7 lc rgb 'red' title 'Class 0', "
             "'-' with points pointtype 7 lc rgb 'blue' title 'Class 1', "
             "'-' with lines lt rgb 'black' lw 2 title 'Decision Boundary'\n";

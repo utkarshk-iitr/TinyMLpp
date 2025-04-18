@@ -1,69 +1,106 @@
 #include "MainWindow.h"
 #include <QFileDialog>
 #include <QString>
-#include <exception>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
 #include <QComboBox>
+#include <QTextEdit>
+#include <exception>
+#include <QApplication>
+#include <QStyleFactory>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    // Central widget + layout.
-    QWidget *central = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(central);
+    // --- Window Settings ---
+    setWindowTitle("TinyML++");
+    showMaximized(); // Fullscreen
 
-    // Buttons for data operations.
-    QPushButton *openFileButton = new QPushButton("Open CSV File", this);
-    QPushButton *showDataButton = new QPushButton("Show Data", this);
-    QPushButton *normalizeButton = new QPushButton("Normalize (Min-Max)", this);
-    QPushButton *standardizeButton = new QPushButton("Standardize (Z-Score)", this);
+    // --- Central Widget & Main Layout ---
+    auto *central = new QWidget(this);
+    auto *mainLayout = new QHBoxLayout(central); // horizontal split
 
-    // Combo box for algorithm selection.
-    QLabel *algoLabel = new QLabel("Select Algorithm:", this);
-    QComboBox *algoCombo = new QComboBox(this);
-    algoCombo->addItem("K-Means");
-    algoCombo->addItem("Linear Regression");
-    algoCombo->addItem("Logistic Regression");
-    algoCombo->addItem("KNN");
+    // --- Left Controls Panel ---
+    auto *controlsLayout = new QVBoxLayout();
 
-    // Buttons for ML operations.
-    QPushButton *predictButton = new QPushButton("Predict", this);
-    QPushButton *evaluateButton = new QPushButton("Evaluate", this);
+    auto *openFileButton     = new QPushButton("📂 Open CSV File", this);
+    auto *showDataButton     = new QPushButton("📊 Show Data", this);
+    auto *normalizeButton    = new QPushButton("📈 Normalize (Min-Max)", this);
+    auto *standardizeButton  = new QPushButton("📉 Standardize (Z-Score)", this);
 
-    // A text area to display output.
+    auto *algoLabel = new QLabel("🧠 Select Algorithm:", this);
+    auto *algoCombo = new QComboBox(this);
+    algoCombo->addItems({
+        "K-Means",
+        "Linear Regression",
+        "Logistic Regression",
+        "KNN"
+    });
+
+    auto *predictButton  = new QPushButton("⚙️ Predict", this);
+    auto *evaluateButton = new QPushButton("📐 Evaluate", this);
+
+    // Add controls to left layout
+    controlsLayout->addWidget(openFileButton);
+    controlsLayout->addWidget(showDataButton);
+    controlsLayout->addWidget(normalizeButton);
+    controlsLayout->addWidget(standardizeButton);
+    controlsLayout->addSpacing(10);
+    controlsLayout->addWidget(algoLabel);
+    controlsLayout->addWidget(algoCombo);
+    controlsLayout->addSpacing(10);
+    controlsLayout->addWidget(predictButton);
+    controlsLayout->addWidget(evaluateButton);
+    controlsLayout->addStretch(); // Push everything up
+
+    // --- Right Output Area ---
     outputArea = new QTextEdit(this);
     outputArea->setReadOnly(true);
 
-    // Add widgets to layout.
-    layout->addWidget(openFileButton);
-    layout->addWidget(showDataButton);
-    layout->addWidget(normalizeButton);
-    layout->addWidget(standardizeButton);
-    layout->addWidget(algoLabel);
-    layout->addWidget(algoCombo);
-    layout->addWidget(predictButton);
-    layout->addWidget(evaluateButton);
-    layout->addWidget(outputArea);
+    // --- Assemble Layout ---
+    mainLayout->addLayout(controlsLayout, 1);   // 1/3 of space
+    mainLayout->addWidget(outputArea, 2);       // 2/3 of space
 
     setCentralWidget(central);
 
-    // Connect signals and slots.
-    connect(openFileButton, &QPushButton::clicked, this, &MainWindow::onOpenFile);
-    connect(showDataButton, &QPushButton::clicked, this, &MainWindow::onShowData);
-    connect(normalizeButton, &QPushButton::clicked, this, &MainWindow::onNormalizeData);
+    // --- Dark Mode Styling ---
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+    QPalette darkPalette;
+    darkPalette.setColor(QPalette::Window, QColor(30, 30, 30));
+    darkPalette.setColor(QPalette::WindowText, Qt::white);
+    darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
+    darkPalette.setColor(QPalette::AlternateBase, QColor(30, 30, 30));
+    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+    darkPalette.setColor(QPalette::Text, Qt::white);
+    darkPalette.setColor(QPalette::Button, QColor(45, 45, 45));
+    darkPalette.setColor(QPalette::ButtonText, Qt::white);
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+    qApp->setPalette(darkPalette);
+
+    // --- Signal-Slot Connections ---
+    connect(openFileButton,    &QPushButton::clicked, this, &MainWindow::onOpenFile);
+    connect(showDataButton,    &QPushButton::clicked, this, &MainWindow::onShowData);
+    connect(normalizeButton,   &QPushButton::clicked, this, &MainWindow::onNormalizeData);
     connect(standardizeButton, &QPushButton::clicked, this, &MainWindow::onStandardizeData);
-    connect(predictButton, &QPushButton::clicked, this, [this, algoCombo](){
+
+    connect(predictButton, &QPushButton::clicked, this, [=]() {
         onPredict(algoCombo->currentText());
     });
-    connect(evaluateButton, &QPushButton::clicked, this, [this, algoCombo](){
+
+    connect(evaluateButton, &QPushButton::clicked, this, [=]() {
         onEvaluate(algoCombo->currentText());
     });
 }
 
 MainWindow::~MainWindow() {}
 
+
+// --- File Open Handler ---
 void MainWindow::onOpenFile()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Open CSV", "", "CSV Files (*.csv)");
@@ -71,22 +108,25 @@ void MainWindow::onOpenFile()
         currentFile = filePath.toStdString();
         try {
             data = handle::readCSV(currentFile);
-            outputArea->append("Loaded file: " + filePath);
-        } catch (std::exception &e) {
-            outputArea->append(QString("Error: %1").arg(e.what()));
+            outputArea->append("✅ Loaded file: " + filePath);
+        } catch (const std::exception &e) {
+            outputArea->append("❌ Error: " + QString::fromStdString(e.what()));
         }
     }
 }
 
+// --- Display Data Preview ---
 void MainWindow::onShowData()
 {
     if (data.features.empty()) {
-        outputArea->append("No data loaded.");
+        outputArea->append("⚠️ No data loaded.");
         return;
     }
 
-    int rowsToPrint = std::min(static_cast<int>(data.features.size()), 10);
-    for (int i = 0; i < rowsToPrint; i++) {
+    outputArea->append(QString("📄 Previewing first rows (%1 total rows)").arg(data.features.size()));
+    int rowsToPrint = std::min<int>(10, data.features.size());
+
+    for (int i = 0; i < rowsToPrint; ++i) {
         QString row;
         for (const auto &cell : data.features[i]) {
             row += QString::fromStdString(cell) + "\t";
@@ -95,42 +135,50 @@ void MainWindow::onShowData()
     }
 }
 
+// --- Normalize Handler ---
 void MainWindow::onNormalizeData()
 {
     if (data.features.empty()) {
-        outputArea->append("No data to normalize.");
+        outputArea->append("⚠️ No data to normalize.");
         return;
     }
     handle::minMaxNormalize(data);
-    outputArea->append("Data has been normalized (Min-Max).");
+    outputArea->append("✅ Data normalized using Min-Max scaling.");
 }
 
+// --- Standardize Handler ---
 void MainWindow::onStandardizeData()
 {
     if (data.features.empty()) {
-        outputArea->append("No data to standardize.");
+        outputArea->append("⚠️ No data to standardize.");
         return;
     }
     handle::standardize(data);
-    outputArea->append("Data has been standardized (Z-Score).");
+    outputArea->append("✅ Data standardized using Z-Score.");
 }
 
+// --- Prediction Handler ---
 void MainWindow::onPredict(const QString &algo)
 {
     if (data.features.empty()) {
-        outputArea->append("No data available for prediction.");
+        outputArea->append("⚠️ No data available for prediction.");
         return;
     }
-    // TODO: Instantiate and predict using the chosen algorithm.
-    outputArea->append("Prediction called using: " + algo);
+
+    outputArea->append("🔮 Predicting with algorithm: " + algo);
+
+    // TODO: Add prediction logic per algorithm.
 }
 
+// --- Evaluation Handler ---
 void MainWindow::onEvaluate(const QString &algo)
 {
     if (data.features.empty()) {
-        outputArea->append("No data available for evaluation.");
+        outputArea->append("⚠️ No data available for evaluation.");
         return;
     }
-    // TODO: Evaluate the model's performance metrics.
-    outputArea->append("Evaluation called for: " + algo);
+
+    outputArea->append("📏 Evaluating model with algorithm: " + algo);
+
+    // TODO: Add evaluation logic per algorithm.
 }

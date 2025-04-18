@@ -1,24 +1,27 @@
 #!/bin/bash
-cd /home/kavy/Projects/TinyMLpp
+set -e  # Exit immediately on any error
+
+cd /home/kavy/Projects/TinyMLpp || exit 1
 
 if [ "$1" = "-r" ]; then
     ./TinyMLppGUI
     exit 0
 fi
 
-# Generate Meta-Object code from header
+echo "Generating Qt MOC..."
 moc test/MainWindow.h -o test/moc_MainWindow.cpp
 
-# Compile everything
+echo "Compiling project..."
 g++ -std=c++20 -fPIC \
     test/GUI.cpp \
     test/MainWindow.cpp \
     test/moc_MainWindow.cpp \
     src/data_handling.cpp \
     src/logistic_regression.cpp \
+    src/linear_regression.cpp \
     src/knn.cpp \
     src/k_means_clustering.cpp \
-    -Igui \
+    -Itest \
     -Isrc \
     -I/usr/include/python3.10 \
     -I/usr/lib/python3/dist-packages/numpy/core/include \
@@ -30,5 +33,5 @@ g++ -std=c++20 -fPIC \
     -lpython3.10 \
     -o TinyMLppGUI
 
-# Run the app
+echo "Build successful! Running the app..."
 ./TinyMLppGUI

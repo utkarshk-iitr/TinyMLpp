@@ -19,17 +19,23 @@ public:
     ~MainWindow();
 
 private slots:
+    // File operations
     void onOpenFile();
     void onShowData();
+
+    // Data preprocessing
     void onNormalizeData();
     void onStandardizeData();
+
+    // Machine learning operations
     void onPredict(const QString &algo);
     void onEvaluate(const QString &algo);
 
 private:
-    std::string currentFile;
-    handle::Data data;
-    QTextEdit *outputArea = nullptr;
+    std::string currentFile;     // Path to currently loaded CSV
+    handle::Data data;           // Data container from TinyML++
+
+    QTextEdit *outputArea = nullptr; // Output display widget
 };
 
 #endif // MAINWINDOW_H

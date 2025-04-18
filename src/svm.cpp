@@ -1,158 +1,143 @@
-// test_svm.cpp
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#ifndef SVM_H
+#define SVM_H
+
 #include <vector>
-#include <cstdio>
-#include <memory>
-#include <stdexcept>
-#include <array>
-#include <cstdlib>
 #include <cmath>
-#include "../src/data_handling.h"   // Data, readCSV(), toDouble(), etc.
-#include "../src/svm.cpp"             // Your from‑scratch SVM class
+#include <algorithm>
+#include <stdexcept>
 
-using namespace std;
+#include "base.h"
+#include "data_handling.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include "../include/matplotlibcpp.h"
+#pragma GCC diagnostic pop
+
 using namespace handle;
+namespace plt = matplotlibcpp;
 
-/** 
- * @brief Run a shell command and capture its entire output.
- */
-string exec(const char* cmd) {
-    array<char, 128> buffer;
-    string result;
-    shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-    if (!pipe) throw runtime_error("popen() failed!");
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
-        result += buffer.data();
-    return result;
-}
-
-/**
- * @brief Parse whitespace‑separated doubles into a vector.
- */
-vector<double> parsePythonOutputDouble(const string &output) {
-    vector<double> v;
-    istringstream iss(output);
-    double x;
-    while (iss >> x) v.push_back(x);
-    return v;
-}
-
-/**
- * @brief Compare two double vectors within a tolerance.
- */
-bool compareVectors(const vector<double>& a, const vector<double>& b, double tol = 1e-4) {
-    if (a.size() != b.size()) return false;
-    for (size_t i = 0; i < a.size(); ++i)
-        if (fabs(a[i] - b[i]) > tol) return false;
-    return true;
-}
-
-int main() {
-    try {
-        // ----------------------------------------------------------------
-        // 1) Load dataset
-        // ----------------------------------------------------------------
-        string filename = "diabetes.csv";          // expects last column = class label {-1, +1} or {0,1}
-        Data data = readCSV(filename);
-        // Convert labels to {-1,+1} in place:
-        for (auto &lbl : data.target) {
-            double y = toDouble(lbl);
-            lbl = (y == 0.0 ? "-1" : "1");
+class SVM : public Model {
+    private:
+        std::vector<double> weights;  // w (size = #features)
+        double bias;                  // b
+        double C;                     // regularization parameter
+    
+    public:
+        // C: penalty term, lr: learning rate, ep: epochs
+        SVM(double C_ = 1.0, double lr = 0.001, int ep = 1000)
+          : Model(lr, ep), C(C_), bias(0.0) {}
+    
+        // Train using batch subgradient descent on ½||w||² + C·hinge
+        void* train(Data &data) override {
+            size_t m = data.features.size();
+            if (m == 0) throw std::runtime_error("No data provided to SVM::train");
+            size_t n = data.features[0].size();
+    
+            weights.assign(n, 0.0);
+            bias = 0.0;
+    
+            for (int epoch = 0; epoch < epochs; ++epoch) {
+                std::vector<double> grad_w(n, 0.0);
+                double grad_b = 0.0;
+    
+                // 1) hinge‐loss subgradient
+                for (size_t i = 0; i < m; ++i) {
+                    double yi = toDouble(data.target[i]);
+                    double dot = bias;
+                    for (size_t j = 0; j < n; ++j)
+                        dot += weights[j] * toDouble(data.features[i][j]);
+    
+                    if (yi * dot < 1.0) {
+                        for (size_t j = 0; j < n; ++j)
+                            grad_w[j] += -C * yi * toDouble(data.features[i][j]);
+                        grad_b   += -C * yi;
+                    }
+                }
+    
+                // 2) regularization gradient: ∇½||w||² = w
+                for (size_t j = 0; j < n; ++j)
+                    grad_w[j] += weights[j];
+    
+                // 3) update (no averaging by m)
+                for (size_t j = 0; j < n; ++j)
+                    weights[j] -= learningRate * grad_w[j];
+                bias -= learningRate * grad_b;
+            }
+    
+            // pack parameters: [b, w₀, w₁, …]
+            double* params = new double[n + 1];
+            params[0] = bias;
+            for (size_t j = 0; j < n; ++j)
+                params[j + 1] = weights[j];
+            return static_cast<void*>(params);
+        }
+    
+        // Predict labels {-1, +1}
+        std::vector<double> predict(Data &data) override {
+            size_t m = data.features.size();
+            size_t n = data.features[0].size();
+            std::vector<double> preds(m);
+    
+            for (size_t i = 0; i < m; ++i) {
+                double sum = bias;
+                for (size_t j = 0; j < n; ++j)
+                    sum += weights[j] * toDouble(data.features[i][j]);
+                preds[i] = (sum >= 0.0 ? 1.0 : -1.0);
+            }
+            return preds;
         }
 
-        // ----------------------------------------------------------------
-        // 2) Train C++ SVM
-        // ----------------------------------------------------------------
-        SVM svm(1.0, 0.005, 10000);
-        void* raw = svm.train(data);
-        double* params = static_cast<double*>(raw);
-        size_t n_feats = data.features[0].size();
-        
-        cout<<n_feats<<endl;
-        // get predictions
-        vector<double> cppPreds = svm.predict(data);
+    // 2D plot (only works if features.size()==2)
+    void plotSVM(Data &data, const vector<double>& params) {
+        // if (data.features.empty() || data.features[0].size() != 2)
+        //     throw runtime_error("plotSVM requires exactly 2 features");
 
-        // copy params into vector for plotting
-        vector<double> svmParams;
-        svmParams.push_back(params[0]); // bias
-        cout<<svmParams[0]<<" ";
-        for (size_t i = 0; i < n_feats; ++i)
-        {
-            svmParams.push_back(params[i+1]);
-            cout<<svmParams[i]<<" ";
-        }   
-        cout<<endl;
-        delete[] params;
+        // extract bias & weights
+        double b = params[0];
+        double w0 = params[1];
+        double w1 = params[2];
 
-        // ----------------------------------------------------------------
-        // 3) Write Python test script (scikit‑learn SVM)
-        // ----------------------------------------------------------------
-        ofstream py("temp_svm.py");
-        if (!py) throw runtime_error("Cannot write temp_svm.py");
-        py << R"(#!/usr/bin/env python3
-import sys
-import numpy as np
-import pandas as pd
-from sklearn.svm import SVC
-
-# load
-df = pd.read_csv(sys.argv[1])
-X = df.iloc[:, :-1].values
-y = df.iloc[:, -1].map({0: -1, 1: 1}).values
-
-# train & predict
-clf = SVC(C=1.0, kernel='linear')
-clf.fit(X, y)
-preds = clf.predict(X)
-
-# print predictions
-# print(" ".join(map(str, preds)))
-
-# print parameters
-w = clf.coef_[0]
-b = clf.intercept_[0]
-
-# Print as: bias w0 w1 w2 ...
-params = [b] + w.tolist()
-print(" ".join(map(str, params)))
-
-)";
-        py.close();
-        system("chmod +x temp_svm.py");
-
-        // ----------------------------------------------------------------
-        // 4) Run Python script & parse
-        // ----------------------------------------------------------------
-        string out = exec("./temp_svm.py diabetes.csv");
-        vector<double> pyPreds = parsePythonOutputDouble(out);
-
-        // ----------------------------------------------------------------
-        // 5) Compare
-        // ----------------------------------------------------------------
-        bool ok = compareVectors(cppPreds, pyPreds, 1e-6);
-        if (ok) {
-            cout << "Test passed: C++ and Python SVM predictions match.\n";
-        } else {
-            // cout << "Test FAILED.\nC++ preds: ";
-            // for (auto &v : cppPreds) cout << v << " ";
-            cout << "\nPython preds: ";
-            for (auto &v : pyPreds)  cout << v << " ";
-            cout << "\n";
+        // split points by true label
+        vector<double> x_pos, y_pos, x_neg, y_neg;
+        for (size_t i = 0; i < data.features.size(); ++i) {
+            double x = toDouble(data.features[i][0]);
+            double y = toDouble(data.features[i][1]);
+            double lab = toDouble(data.target[i]);
+            if (lab > 0) {
+                x_pos.push_back(x);
+                y_pos.push_back(y);
+            } else {
+                x_neg.push_back(x);
+                y_neg.push_back(y);
+            }
         }
 
-        // ----------------------------------------------------------------
-        // 6) Plot decision boundary (only for 2D features)
-        // ----------------------------------------------------------------
-        svm.plotSVM(data, svmParams);
+        // decision boundary line: w0*x + w1*y + b = 0  ⇒  y = -(w0/w1)x - b/w1
+        double x_min = *min_element(x_pos.begin(), x_pos.end());
+        x_min = min(x_min, *min_element(x_neg.begin(), x_neg.end()));
+        double x_max = *max_element(x_pos.begin(), x_pos.end());
+        x_max = max(x_max, *max_element(x_neg.begin(), x_neg.end()));
 
-        // cleanup
-        remove("temp_svm.py");
+        const int num = 100;
+        vector<double> xb(num), yb(num);
+        double step = (x_max - x_min) / (num - 1);
+        for (int i = 0; i < num; ++i) {
+            xb[i] = x_min + i * step;
+            yb[i] = -(w0 / w1) * xb[i] - b / w1;
+        }
+
+        plt::figure_size(800, 600);
+        plt::scatter(x_pos, y_pos, 30.0, {{"color", "blue"}, {"label", "+1"}});
+        plt::scatter(x_neg, y_neg, 30.0, {{"color", "red"},   {"label", "-1"}});
+        plt::plot(xb, yb, {{"color", "black"}, {"label", "Decision Boundary"}});
+        plt::xlabel("Feature 0");
+        plt::ylabel("Feature 1");
+        plt::title("Linear SVM Classification");
+        plt::legend();
+        plt::grid(true);
+        plt::show();
     }
-    catch (const exception &e) {
-        cerr << "Error: " << e.what() << "\n";
-        return 1;
-    }
-    return 0;
-}
+};
+
+#endif // SVM_H

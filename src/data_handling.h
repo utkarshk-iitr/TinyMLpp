@@ -1,3 +1,4 @@
+
 #pragma once
 #ifndef DATA_HANDLING_H
 #define DATA_HANDLING_H
@@ -11,6 +12,9 @@
 #include <cfloat>
 #include <cmath>
 #include <stdexcept>
+#include <algorithm>
+#include <numeric>
+#include <random>
 
 using namespace std;
 
@@ -100,6 +104,11 @@ void standardize(Data &data);
  * @param theta The model parameters (theta[0] is the intercept; theta[1..n] are feature weights).
  * @return The Mean Squared Error.
  */
+
+
+ pair<Data, Data> train_test_split(Data& dataset, double test_size = 0.2, unsigned seed = random_device{}());
+
+
 double computeMeanSquaredError(Data &data, vector<double> &theta);
 
 /**
@@ -111,5 +120,9 @@ double computeMeanSquaredError(Data &data, vector<double> &theta);
  */
 double computeLogLoss(Data &data, vector<double> &theta);
 
+double computeAccuracy(vector<double> &true_labels, vector<double> &predicted_labels);
+
 #endif // DATA_HANDLING_H
 }
+
+

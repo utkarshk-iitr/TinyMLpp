@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TinyML Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <span>TinyML</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="#dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+                    </li>
+                    <li>
+                        <a href="#train"><i class="fas fa-cogs"></i><span>Train Model</span></a>
+                    </li>
+                    <li>
+                        <a href="#predict"><i class="fas fa-chart-line"></i><span>Predict</span></a>
+                    </li>
+                    <li>
+                        <a href="#compare"><i class="fas fa-balance-scale"></i><span>Compare</span></a>
+                    </li>
+                    <li>
+                        <a href="#history"><i class="fas fa-history"></i><span>History</span></a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation -->
+            <header class="top-header">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search algorithms, models...">
+                </div>
+                <div class="header-actions">
+                    <button class="theme-toggle"><i class="fas fa-moon"></i></button>
+                    <button class="notification-btn"><i class="fas fa-bell"></i></button>
+                    <div class="user-profile">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                        <div class="user-info">
+                            <span class="user-name">Alex Johnson</span>
+                            <span class="user-role">Data Scientist</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <div class="welcome-text">
+                        <h1>Welcome to TinyML Dashboard</h1>
+                        <p>Efficient machine learning for embedded systems</p>
+                    </div>
+                    <div class="date-selector">
+                        <span><i class="far fa-calendar"></i> Today, <span id="current-date">May 15, 2024</span></span>
+                        <button class="view-toggle">
+                            <span>Weekly</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Performance</h3>
+                            <div class="stat-value">95<span class="unit">%</span></div>
+                            <div class="stat-progress">
+                                <div class="progress-bar" style="width: 95%"></div>
+                            </div>
+                            <div class="stat-comparison">
+                                <span class="better">+12% vs Python</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-memory"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Memory Usage</h3>
+                            <div class="stat-value">2.5<span class="unit">MB</span></div>
+                            <div class="stat-progress">
+                                <div class="progress-bar" style="width: 30%"></div>
+                            </div>
+                            <div class="stat-comparison">
+                                <span class="better">-45% vs Python</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Training Time</h3>
+                            <div class="stat-value">0.8<span class="unit">s</span></div>
+                            <div class="stat-progress">
+                                <div class="progress-bar" style="width: 20%"></div>
+                            </div>
+                            <div class="stat-comparison">
+                                <span class="better">-65% vs Python</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Algorithm Selection -->
+                <section id="train" class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-cogs"></i> Train Your Model</h2>
+                        <div class="card-actions">
+                            <button class="action-icon"><i class="fas fa-expand-alt"></i></button>
+                            <button class="action-icon"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="train-model-section">
+                            <div class="algorithm-selection">
+                                <h3>Select Algorithm</h3>
+                                <div class="algorithm-cards">
+                                    <!-- First Row -->
+                                    <div class="algorithm-row">
+                                        <div class="algorithm-card" data-algorithm="linear-regression">
+                                            <div class="algorithm-icon">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <div class="algorithm-content">
+                                                <h3>Linear Regression</h3>
+                                                <p>Predict continuous values</p>
+                                            </div>
+                                        </div>
+                                        <div class="algorithm-card" data-algorithm="logistic-regression">
+                                            <div class="algorithm-icon">
+                                                <i class="fas fa-wave-square"></i>
+                                            </div>
+                                            <div class="algorithm-content">
+                                                <h3>Logistic Regression</h3>
+                                                <p>Binary classification</p>
+                                            </div>
+                                        </div>
+                                        <div class="algorithm-card" data-algorithm="knn">
+                                            <div class="algorithm-icon">
+                                                <i class="fas fa-users"></i>
+                                            </div>
+                                            <div class="algorithm-content">
+                                                <h3>K-Nearest Neighbors</h3>
+                                                <p>Instance-based learning</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Second Row -->
+                                    <div class="algorithm-row">
+                                        <div class="algorithm-card" data-algorithm="k-means">
+                                            <div class="algorithm-icon">
+                                                <i class="fas fa-object-group"></i>
+                                            </div>
+                                            <div class="algorithm-content">
+                                                <h3>K-Means Clustering</h3>
+                                                <p>Unsupervised grouping</p>
+                                            </div>
+                                        </div>
+                                        <div class="algorithm-card" data-algorithm="decision-tree">
+                                            <div class="algorithm-icon">
+                                                <i class="fas fa-project-diagram"></i>
+                                            </div>
+                                            <div class="algorithm-content">
+                                                <h3>Decision Tree</h3>
+                                                <p>Tree-based decisions</p>
+                                            </div>
+                                        </div>
+                                        <div class="algorithm-card" data-algorithm="svm">
+                                            <div class="algorithm-icon">
+                                                <i class="fas fa-border-all"></i>
+                                            </div>
+                                            <div class="algorithm-content">
+                                                <h3>Support Vector Machine</h3>
+                                                <p>Optimal hyperplane</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="parameter-section">
+                                <h3>Model Parameters</h3>
+                                <div id="parameter-form" class="parameter-form">
+                                    <!-- Parameters will be dynamically inserted here -->
+                                </div>
+                                <button id="train-button" class="train-button">
+                                    <i class="fas fa-cogs"></i>
+                                    Train Model
+                                </button>
+                            </div>
+
+                            <div class="results-section">
+                                <div id="model-results" class="model-results">
+                                    <!-- Results will be dynamically inserted here -->
+                                </div>
+                                <div id="model-history" class="model-history">
+                                    <h3>Training History</h3>
+                                    <!-- History items will be dynamically inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Visualization and Prediction Results -->
+                <div class="dashboard-row">
+                    <section class="dashboard-card visualization-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-chart-bar"></i> Visualization</h2>
+                            <div class="card-actions">
+                                <div class="plot-options">
+                                    <button class="plot-btn active" data-plot="scatter">
+                                        <i class="fas fa-dot-circle"></i>
+                                    </button>
+                                    <button class="plot-btn" data-plot="line">
+                                        <i class="fas fa-chart-line"></i>
+                                    </button>
+                                    <button class="plot-btn" data-plot="bar">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </button>
+                                </div>
+                                <button class="action-icon"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div id="plot-container" class="plot-container">
+                                <canvas id="visualization-chart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="predict" class="dashboard-card prediction-card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-magic"></i> Prediction</h2>
+                            <div class="card-actions">
+                                <div class="input-methods">
+                                    <button class="input-method-btn active" data-method="manual">
+                                        <i class="fas fa-keyboard"></i>
+                                    </button>
+                                    <button class="input-method-btn" data-method="file">
+                                        <i class="fas fa-file-upload"></i>
+                                    </button>
+                                </div>
+                                <button class="action-icon"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div id="prediction-inputs" class="prediction-inputs">
+                                <div class="input-field">
+                                    <label>Feature 1</label>
+                                    <input type="number" placeholder="Enter value">
+                                </div>
+                                <div class="input-field">
+                                    <label>Feature 2</label>
+                                    <input type="number" placeholder="Enter value">
+                                </div>
+                                <div class="input-field">
+                                    <label>Feature 3</label>
+                                    <input type="number" placeholder="Enter value">
+                                </div>
+                            </div>
+                            <div id="prediction-result" class="prediction-result">
+                                <div class="result-label">Prediction Result</div>
+                                <div class="result-value">Class A</div>
+                                <div class="result-confidence">
+                                    <div class="confidence-label">Confidence</div>
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: 85%"></div>
+                                        <span class="confidence-value">85%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button id="predict-btn" class="primary-btn">
+                                <i class="fas fa-magic"></i> Predict
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Performance Comparison -->
+                <section id="compare" class="dashboard-card comparison-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-balance-scale"></i> Performance Comparison</h2>
+                        <div class="card-actions">
+                            <select class="chart-type">
+                                <option value="bar">Bar Chart</option>
+                                <option value="radar">Radar Chart</option>
+                            </select>
+                            <button class="action-icon"><i class="fas fa-download"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="comparison-metrics">
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>Training Time</h3>
+                                    <div class="metric-values">
+                                        <div class="metric-item">
+                                            <span class="metric-language">C++</span>
+                                            <span class="metric-value" id="cpp-time">0.8s</span>
+                                        </div>
+                                        <div class="metric-item">
+                                            <span class="metric-language">Python</span>
+                                            <span class="metric-value" id="python-time">2.3s</span>
+                                        </div>
+                                    </div>
+                                    <div class="metric-diff better">
+                                        <i class="fas fa-arrow-down"></i> 65% faster
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-memory"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>Memory Usage</h3>
+                                    <div class="metric-values">
+                                        <div class="metric-item">
+                                            <span class="metric-language">C++</span>
+                                            <span class="metric-value" id="cpp-memory">2.5MB</span>
+                                        </div>
+                                        <div class="metric-item">
+                                            <span class="metric-language">Python</span>
+                                            <span class="metric-value" id="python-memory">4.6MB</span>
+                                        </div>
+                                    </div>
+                                    <div class="metric-diff better">
+                                        <i class="fas fa-arrow-down"></i> 45% less memory
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>Accuracy</h3>
+                                    <div class="metric-values">
+                                        <div class="metric-item">
+                                            <span class="metric-language">C++</span>
+                                            <span class="metric-value" id="cpp-accuracy">95%</span>
+                                        </div>
+                                        <div class="metric-item">
+                                            <span class="metric-language">Python</span>
+                                            <span class="metric-value" id="python-accuracy">93%</span>
+                                        </div>
+                                    </div>
+                                    <div class="metric-diff better">
+                                        <i class="fas fa-arrow-up"></i> 2% more accurate
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-chart">
+                            <canvas id="comparison-chart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Training History -->
+                <section id="history" class="dashboard-card history-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-history"></i> Training History</h2>
+                        <div class="card-actions">
+                            <div class="history-filters">
+                                <input type="text" placeholder="Search models..." class="search-input">
+                                <select class="filter-select">
+                                    <option value="all">All Algorithms</option>
+                                    <option value="knn">KNN</option>
+                                    <option value="svm">SVM</option>
+                                    <option value="decision-tree">Decision Tree</option>
+                                </select>
+                            </div>
+                            <button class="action-icon"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="history-list">
+                            <div class="history-item">
+                                <div class="history-icon knn">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <div class="history-details">
+                                    <div class="history-name">KNN Model #1</div>
+                                    <div class="history-meta">
+                                        <span class="history-time">Today, 10:23 AM</span>
+                                        <span class="history-accuracy">Accuracy: 95%</span>
+                                    </div>
+                                </div>
+                                <div class="history-actions">
+                                    <button class="action-btn"><i class="fas fa-play"></i></button>
+                                    <button class="action-btn"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
+                            <div class="history-item">
+                                <div class="history-icon svm">
+                                    <i class="fas fa-chart-area"></i>
+                                </div>
+                                <div class="history-details">
+                                    <div class="history-name">SVM Model #1</div>
+                                    <div class="history-meta">
+                                        <span class="history-time">Yesterday, 3:45 PM</span>
+                                        <span class="history-accuracy">Accuracy: 92%</span>
+                                    </div>
+                                </div>
+                                <div class="history-actions">
+                                    <button class="action-btn"><i class="fas fa-play"></i></button>
+                                    <button class="action-btn"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
+                            <div class="history-item">
+                                <div class="history-icon decision-tree">
+                                    <i class="fas fa-tree"></i>
+                                </div>
+                                <div class="history-details">
+                                    <div class="history-name">Decision Tree Model #1</div>
+                                    <div class="history-meta">
+                                        <span class="history-time">May 12, 2024, 1:12 PM</span>
+                                        <span class="history-accuracy">Accuracy: 89%</span>
+                                    </div>
+                                </div>
+                                <div class="history-actions">
+                                    <button class="action-btn"><i class="fas fa-play"></i></button>
+                                    <button class="action-btn"><i class="fas fa-download"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,159 +1,124 @@
-
-#ifndef LINEAR_REGRESSION_H
-#define LINEAR_REGRESSION_H
-
 #include <iostream>
-#include <stdexcept>
-#include <algorithm>
 #include <vector>
-#include "base.h"         
-#include "data_handling.h"
-#include <gnuplot-iostream.h>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <cfloat>
+#include <cmath>
+#include "data_handling.h"    // for readCSV, toDouble, computeMeanSquaredError, train_test_split, etc.
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#pragma GCC diagnostic pop
+using namespace std;
+using namespace handle;       // brings Data, train_test_split, computeMeanSquaredError, etc. into scope
 
-using namespace handle;
+/**
+ * Train/Test split defaults:
+ *   test_size = 0.2  (20% of data reserved for test)
+ *   seed      = 42   (fixed for reproducibility)
+ */
+static constexpr double DEFAULT_TEST_SIZE = 0.2;
+static constexpr unsigned DEFAULT_SEED   = 42;
 
-class LinearRegression : public Model {
-private:
-    std::vector<double> theta; // Model parameters: theta[0] is the intercept; theta[1..n] are the weights.
+// LinearRegression class definition (methods)
+class LinearRegression {
 public:
-    // Constructor with optional parameters for learning rate and number of epochs.
-    LinearRegression(double lr = 0.01, int ep = 1000) : Model(lr, ep) {}
+    double learningRate;
+    int epochs;
+private:
+    vector<double> theta;
 
-    // Train the model using either the closed-form solution (for one feature)
-    // or gradient descent (for multiple features).
-    void* train(Data &data) override {
-        size_t m = data.features.size();
-        if (m == 0) {
-            throw std::runtime_error("No data available");
-        }
-        size_t n = data.features[0].size();
+public:
+    LinearRegression(double lr = 0.01, int ep = 1000)
+      : learningRate(lr), epochs(ep) {}
 
+    // Splits data, trains on trainData, reports on both splits
+    void* train(Data &data) {
+        // 1. Split into train/test
+        auto [trainData, testData] = train_test_split(data, DEFAULT_TEST_SIZE, DEFAULT_SEED);
+
+        cout << "Training on " << trainData.features.size()
+             << " samples; testing on " << testData.features.size() << " samples.\n";
+
+        // Use trainData for fitting
+        size_t m = trainData.features.size();
+        if (m == 0) throw runtime_error("No training data available after split");
+        size_t n = trainData.features[0].size();
+
+        // Choose closed-form if single feature
         if (n == 1) {
-            // Closed-form solution for simple linear regression.
-            double sumX = 0.0, sumY = 0.0;
-            for (size_t i = 0; i < m; ++i) {
-                double x = toDouble(data.features[i][0]);
-                double y = toDouble(data.target[i]);
-                sumX += x;
-                sumY += y;
+            double sumX = 0, sumY = 0;
+            for (auto &row : trainData.features) {
+                sumX += toDouble(row[0]);
             }
-            double meanX = sumX / m;
-            double meanY = sumY / m;
-
-            double numerator = 0.0, denominator = 0.0;
-            for (size_t i = 0; i < m; ++i) {
-                double x = toDouble(data.features[i][0]);
-                double y = toDouble(data.target[i]);
-                numerator += (x - meanX) * (y - meanY);
-                denominator += (x - meanX) * (x - meanX);
+            for (auto &t : trainData.target) {
+                sumY += toDouble(t);
             }
-            double theta1 = (denominator == 0 ? 1e9 : numerator / denominator);
-            double theta0 = meanY - theta1 * meanX;
-            theta = { theta0, theta1 };
+            double meanX = sumX / m, meanY = sumY / m;
 
-            std::cout << "Closed-form Linear Regression Solution:" << std::endl;
-        } else {
-            // Use gradient descent for multiple features.
-            theta.assign(n + 1, 0.0); // theta[0] is intercept; theta[1..n] are feature weights.
+            double num = 0, den = 0;
+            for (size_t i = 0; i < m; i++) {
+                double x = toDouble(trainData.features[i][0]);
+                double y = toDouble(trainData.target[i]);
+                num += (x - meanX)*(y - meanY);
+                den += (x - meanX)*(x - meanX);
+            }
+            double slope = den==0 ? 0 : num/den;
+            double intercept = meanY - slope*meanX;
+            theta = {intercept, slope};
+
+            cout << "Used closed-form solution\n";
+        }
+        else {
+            // Gradient descent
+            theta.assign(n+1, 0.0);
             for (int iter = 0; iter < epochs; ++iter) {
-                std::vector<double> gradient(n + 1, 0.0);
-
+                vector<double> grad(n+1, 0.0);
                 for (size_t i = 0; i < m; ++i) {
-                    double prediction = theta[0];
+                    double pred = theta[0];
                     for (size_t j = 0; j < n; ++j) {
-                        double xj = toDouble(data.features[i][j]);
-                        prediction += theta[j + 1] * xj;
+                        pred += theta[j+1] * toDouble(trainData.features[i][j]);
                     }
-                    double y = toDouble(data.target[i]);
-                    double error = prediction - y;
-
-                    gradient[0] += error;
+                    double err = pred - toDouble(trainData.target[i]);
+                    grad[0] += err;
                     for (size_t j = 0; j < n; ++j) {
-                        double xj = toDouble(data.features[i][j]);
-                        gradient[j + 1] += error * xj;
+                        grad[j+1] += err * toDouble(trainData.features[i][j]);
                     }
                 }
-                // Update theta using the average gradient.
                 for (size_t j = 0; j < theta.size(); ++j) {
-                    theta[j] -= learningRate * (gradient[j] / static_cast<double>(m));
+                    theta[j] -= learningRate * (grad[j] / m);
                 }
-                // Optionally, print the cost every 100 iterations.
                 if (iter % 100 == 0) {
-                    double cost = computeMeanSquaredError(data, theta);
-                    std::cout << "Linear Regression Iteration " << iter << ", Cost: " << cost << std::endl;
+                    double cost = computeMeanSquaredError(trainData, theta);
+                    cout << " Iter " << iter << " Train MSE: " << cost << "\n";
                 }
             }
         }
-        double* params = new double[theta.size()];
+
+        // 2. Report final train & test MSE
+        double trainMSE = computeMeanSquaredError(trainData, theta);
+        double testMSE  = computeMeanSquaredError(testData, theta);
+        cout << fixed << setprecision(6)
+             << "Final Train MSE: " << trainMSE
+             << " | Test MSE: " << testMSE << "\n";
+
+        // 3. Return copy of theta
+        double *params = new double[theta.size()];
         for (size_t i = 0; i < theta.size(); ++i) {
             params[i] = theta[i];
         }
-        return static_cast<void*>(params); // Return the parameters as a void pointer.
+        return static_cast<void*>(params);
     }
 
-    // Predict outcomes using the trained model.
-    std::vector<double> predict(Data &data) override {
+    vector<double> predict(Data &data) {
         size_t m = data.features.size();
         size_t n = data.features[0].size();
-        std::vector<double> predictions(m, 0.0);
-
+        vector<double> out(m);
         for (size_t i = 0; i < m; ++i) {
-            double pred = theta[0]; // Start with the intercept.
+            double yhat = theta[0];
             for (size_t j = 0; j < n; ++j) {
-                pred += theta[j + 1] * toDouble(data.features[i][j]);
+                yhat += theta[j+1] * toDouble(data.features[i][j]);
             }
-            predictions[i] = pred;
+            out[i] = yhat;
         }
-        return predictions;
-    }
-
-    void plotLinearRegression(Data &data, vector<double>& theta) {
-        Gnuplot gp;
-    
-        vector<pair<double, double>> data_points;
-        vector<double> y_vals;
-        for (size_t i = 0; i < data.features.size(); ++i) {
-            double x = toDouble(data.features[i][0]);
-            double y = toDouble(data.target[i]);
-            data_points.emplace_back(x, y);
-            y_vals.push_back(y);
-        }
-    
-        // Determine x range for regression line
-        double x_min = min_element(data_points.begin(), data_points.end())->first;
-        double x_max = max_element(data_points.begin(), data_points.end())->first;
-    
-        // Determine y range with padding
-        double y_min = *min_element(y_vals.begin(), y_vals.end());
-        double y_max = *max_element(y_vals.begin(), y_vals.end());
-        y_max *= 1.3;
-
-        int num_points = 100;
-        double step = (x_max - x_min) / (num_points - 1);
-        vector<pair<double, double>> line_points;
-        for (int i = 0; i < num_points; ++i) {
-            double x = x_min + i * step;
-            double y = theta[0] + theta[1] * x;
-            line_points.emplace_back(x, y);
-        }
-    
-        // Plot settings
-        gp << "set title 'Linear Regression Fit'\n";
-        gp << "set xlabel 'Feature 1'\n";
-        gp << "set ylabel 'Target'\n";
-        gp << "set grid\n";
-        gp << "set key top right opaque box font ',8'\n";
-        gp << "set yrange [" << y_min << ":" << y_max << "]\n";
-        gp << "plot '-' with points pointtype 7 lc rgb 'blue' title 'Data Points', "
-              "'-' with lines lw 3 lc rgb 'red' title 'Regression Line'\n";
-    
-        gp.send1d(data_points);
-        gp.send1d(line_points);
+        return out;
     }
 };
-
-#endif // LINEAR_REGRESSION_H

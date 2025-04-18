@@ -9,15 +9,14 @@
 #include <map>
 #include "base.h"             // Assuming Model is defined here
 #include "data_handling.h"   // Assuming Data, toDouble(), etc. are defined here
+#include "gnuplot-iostream.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
+// #include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
 #pragma GCC diagnostic pop
 
 using namespace handle;
-namespace plt = matplotlibcpp;
-
 using namespace std;
 
 class KNN : public Model {
@@ -130,36 +129,47 @@ public:
     }
 
     
-
-    void plotKNNResults(handle::Data& testData, vector<double>& predicted) 
-    {
-        std::vector<double> x_vals_correct, y_vals_correct;
-        std::vector<double> x_vals_wrong, y_vals_wrong;
-
+    void plotKNNResults(handle::Data& testData, vector<double>& predicted) {
+        if (testData.features.empty() || testData.features[0].size() < 2) {
+            throw runtime_error("Data must have at least two features for 2D plotting.");
+        }
+    
+        Gnuplot gp;
+    
+        vector<pair<double, double>> correctPoints;
+        vector<pair<double, double>> wrongPoints;
+        vector<double> y_vals;
+        
         for (size_t i = 0; i < testData.features.size(); ++i) {
-            double x = handle::toDouble(testData.features[i][0]);  // Feature 1
-            double y = handle::toDouble(testData.features[i][1]);  // Feature 2
+            double x = handle::toDouble(testData.features[i][0]);
+            double y = handle::toDouble(testData.features[i][1]);
             double actual = handle::toDouble(testData.target[i]);
             double pred = predicted[i];
-
+            y_vals.push_back(y);
             if (actual == pred) {
-                x_vals_correct.push_back(x);
-                y_vals_correct.push_back(y);
+                correctPoints.emplace_back(x, y);
             } else {
-                x_vals_wrong.push_back(x);
-                y_vals_wrong.push_back(y);
+                wrongPoints.emplace_back(x, y);
             }
         }
-
-        plt::figure_size(800, 600);
-        plt::scatter(x_vals_correct, y_vals_correct, 30.0, {{"color", "green"}, {"label", "Correct"}});
-        plt::scatter(x_vals_wrong, y_vals_wrong, 30.0, {{"color", "red"}, {"label", "Incorrect"}});
-        plt::xlabel("Feature 1");
-        plt::ylabel("Feature 2");
-        plt::title("KNN Classification Results");
-        plt::legend();
-        plt::grid(true);
-        plt::show();
+    
+        double y_min = *min_element(y_vals.begin(), y_vals.end());
+        double y_max = *max_element(y_vals.begin(), y_vals.end());
+        y_max *= 1.2;
+        // Setup the plot
+        gp << "set title 'KNN Classification Results'\n";
+        gp << "set xlabel 'Feature 1'\n";
+        gp << "set ylabel 'Feature 2'\n";
+        gp << "set grid\n";
+        gp << "set key top right opaque box font ',8'\n";
+        gp << "set yrange [" << y_min << ":" << y_max << "]\n";
+        gp << "set style fill solid 1.0\n";
+    
+        gp << "plot '-' with points pointtype 7 ps 1.5 lc rgb 'green' title 'Correct', "
+              "'-' with points pointtype 7 ps 1.5 lc rgb 'red' title 'Incorrect'\n";
+    
+        gp.send1d(correctPoints);
+        gp.send1d(wrongPoints);
     }
 
     

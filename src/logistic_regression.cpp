@@ -62,6 +62,11 @@ public:
                 cout << "Logistic Regression Iteration " << iter << ", Log Loss: " << loss << endl;
             }
         }
+        double* params = new double[theta.size()];
+        for (size_t i = 0; i < theta.size(); ++i) {
+            params[i] = theta[i];
+        }
+        return static_cast<void*>(params); // Return the parameters as a void pointer.
     }
 
     // Predict outcomes using the trained logistic regression model.

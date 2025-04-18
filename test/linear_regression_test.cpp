@@ -181,7 +181,7 @@ if __name__ == "__main__":
         for(auto t: thetaVec){
             cout << t << " ";
         }
-        lr.plotLinearRegression(data, thetaVec);
+        // lr.plotLinearRegression(data, thetaVec);
         // delete the temporary Python file.
         remove("temp_linreg.py");
         

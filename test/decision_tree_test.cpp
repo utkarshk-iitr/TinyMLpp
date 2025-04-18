@@ -50,7 +50,7 @@ bool compareVectors(const vector<double>& a, const vector<double>& b, double tol
 int main() {
     try {
         // 1. Load and preprocess data.
-        string filename = "advertising.csv";
+        string filename = "toy.csv";
         Data data = readCSV(filename);
         displayDataFrame(data);
         standardize(data);
@@ -63,7 +63,8 @@ int main() {
         // 3. Write Python test script.
         ofstream pyFile("temp_dectree.py");
         if (!pyFile) throw runtime_error("Unable to create Python script.");
-        pyFile << R"(# coding: utf-8
+        pyFile << R"(#!/usr/bin/env python3
+# coding: utf-8
 import sys
 import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
@@ -99,7 +100,7 @@ if __name__ == '__main__':
         }
 
         // 6. Cleanup.
-        remove("temp_dectree.py");
+        // remove("temp_dectree.py");
 
     } catch (const exception &e) {
         cerr << "Error: " << e.what() << endl;

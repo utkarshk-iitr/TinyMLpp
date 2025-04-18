@@ -6,6 +6,8 @@ To run the project, navigate to the `test` directory and use the following comma
 
 ```bash
 g++ -std=c++17 k_means_clustering_test.cpp ../src/k_means_clustering.cpp ../src/data_handling.cpp -I/usr/include/python3.10 -I/usr/lib/python3/dist-packages/numpy/core/include -L/usr/lib/python3.10/config-3.10-x86_64-linux-gnu -lpython3.10 -o k_means_clustering_test
+
+g++ linear_regression_test.cpp ../src/linear_regression.cpp ../src/data_handling.cpp -o plotter -std=c++11 -lboost_iostreams -lboost_system
 ```
 
 **Note**: The above command works only for Linux. For Windows, replace the file paths with the appropriate paths on your system after installing the required dependencies.

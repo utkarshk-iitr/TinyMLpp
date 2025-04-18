@@ -134,21 +134,21 @@ if __name__ == "__main__":
         // 5. Compare θ vectors
         bool thetaMatch = compareVectors(cppTheta, pyTheta, 1e-2);
         cout << (thetaMatch ? "θ vectors match." : "θ vectors differ!") << endl;
-        cout << "C++ θ: ";
-        for (auto v : cppTheta) cout << v << " ";
-        cout << "\nPy  θ: ";
-        for (auto v : pyTheta) cout << v << " ";
-        cout << endl;
+        // cout << "C++ θ: ";
+        // for (auto v : cppTheta) cout << v << " ";
+        // cout << "\nPy  θ: ";
+        // for (auto v : pyTheta) cout << v << " ";
+        // cout << endl;
         
         lr.plotLR(data, cppTheta);
         // 6. Compare probabilities
         bool probMatch = compareVectors(cppProbs, pyProbs, 1e-3);
         cout << (probMatch ? "Probabilities match." : "Probabilities differ!") << endl;
-        cout << "C++ probs: ";
-        for (auto p : cppProbs) cout << p << " ";
-        cout << "\nPy  probs: ";
-        for (auto p : pyProbs) cout << p << " ";
-        cout << endl;
+        // cout << "C++ probs: ";
+        // for (auto p : cppProbs) cout << p << " ";
+        // cout << "\nPy  probs: ";
+        // for (auto p : pyProbs) cout << p << " ";
+        // cout << endl;
 
         // Cleanup
         remove("temp_logreg.py");

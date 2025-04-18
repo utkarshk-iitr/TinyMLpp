@@ -8,7 +8,7 @@
 #include <vector>
 #include "base.h"         
 #include "data_handling.h"
-// #include <gnuplot-iostream.h>
+#include <gnuplot-iostream.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -111,49 +111,49 @@ public:
         return predictions;
     }
 
-    // void plotLinearRegression(Data &data, vector<double>& theta) {
-    //     Gnuplot gp;
+    void plotLinearRegression(Data &data, vector<double>& theta) {
+        Gnuplot gp;
     
-    //     vector<pair<double, double>> data_points;
-    //     vector<double> y_vals;
-    //     for (size_t i = 0; i < data.features.size(); ++i) {
-    //         double x = toDouble(data.features[i][0]);
-    //         double y = toDouble(data.target[i]);
-    //         data_points.emplace_back(x, y);
-    //         y_vals.push_back(y);
-    //     }
+        vector<pair<double, double>> data_points;
+        vector<double> y_vals;
+        for (size_t i = 0; i < data.features.size(); ++i) {
+            double x = toDouble(data.features[i][0]);
+            double y = toDouble(data.target[i]);
+            data_points.emplace_back(x, y);
+            y_vals.push_back(y);
+        }
     
-    //     // Determine x range for regression line
-    //     double x_min = min_element(data_points.begin(), data_points.end())->first;
-    //     double x_max = max_element(data_points.begin(), data_points.end())->first;
+        // Determine x range for regression line
+        double x_min = min_element(data_points.begin(), data_points.end())->first;
+        double x_max = max_element(data_points.begin(), data_points.end())->first;
     
-    //     // Determine y range with padding
-    //     double y_min = *min_element(y_vals.begin(), y_vals.end());
-    //     double y_max = *max_element(y_vals.begin(), y_vals.end());
-    //     y_max *= 1.3;
+        // Determine y range with padding
+        double y_min = *min_element(y_vals.begin(), y_vals.end());
+        double y_max = *max_element(y_vals.begin(), y_vals.end());
+        y_max *= 1.3;
 
-    //     int num_points = 100;
-    //     double step = (x_max - x_min) / (num_points - 1);
-    //     vector<pair<double, double>> line_points;
-    //     for (int i = 0; i < num_points; ++i) {
-    //         double x = x_min + i * step;
-    //         double y = theta[0] + theta[1] * x;
-    //         line_points.emplace_back(x, y);
-    //     }
+        int num_points = 100;
+        double step = (x_max - x_min) / (num_points - 1);
+        vector<pair<double, double>> line_points;
+        for (int i = 0; i < num_points; ++i) {
+            double x = x_min + i * step;
+            double y = theta[0] + theta[1] * x;
+            line_points.emplace_back(x, y);
+        }
     
-    //     // Plot settings
-    //     gp << "set title 'Linear Regression Fit'\n";
-    //     gp << "set xlabel 'Feature 1'\n";
-    //     gp << "set ylabel 'Target'\n";
-    //     gp << "set grid\n";
-    //     gp << "set key top right opaque box font ',8'\n";
-    //     gp << "set yrange [" << y_min << ":" << y_max << "]\n";
-    //     gp << "plot '-' with points pointtype 7 lc rgb 'blue' title 'Data Points', "
-    //           "'-' with lines lw 3 lc rgb 'red' title 'Regression Line'\n";
+        // Plot settings
+        gp << "set title 'Linear Regression Fit'\n";
+        gp << "set xlabel 'Feature 1'\n";
+        gp << "set ylabel 'Target'\n";
+        gp << "set grid\n";
+        gp << "set key top right opaque box font ',8'\n";
+        gp << "set yrange [" << y_min << ":" << y_max << "]\n";
+        gp << "plot '-' with points pointtype 7 lc rgb 'blue' title 'Data Points', "
+              "'-' with lines lw 3 lc rgb 'red' title 'Regression Line'\n";
     
-    //     gp.send1d(data_points);
-    //     gp.send1d(line_points);
-    // }
+        gp.send1d(data_points);
+        gp.send1d(line_points);
+    }
 };
 
 #endif // LINEAR_REGRESSION_H

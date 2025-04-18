@@ -3,12 +3,12 @@
 #define LINEAR_REGRESSION_H
 
 #include <iostream>
-#include <vector>
 #include <stdexcept>
+#include <algorithm>
+#include <vector>
 #include "base.h"         
 #include "data_handling.h"
-#include "gnuplot-iostream.h" 
-#include <algorithm>
+#include <gnuplot-iostream.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

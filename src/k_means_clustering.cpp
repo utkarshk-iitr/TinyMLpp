@@ -10,7 +10,7 @@
 #include <algorithm>
 #include "base.h"             // Assumes Model is defined here.
 #include "data_handling.h"
-#include "gnuplot-iostream.h"
+#include <gnuplot-iostream.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

@@ -98,10 +98,9 @@ if __name__ == '__main__':
             cout << endl;
         }
 
-        // 6. Plot the trained tree.
-        string plotFile = "decision_tree.png";
-        dt.plotTree(plotFile);
-        cout << "Decision tree plot saved to '" << plotFile << "'." << endl;
+        // 6. Plot the tree
+        dt.plotTree(true);                     // interactive
+        // dt.plotTree(false, "tree.png");    // or save PNG
 
         // 7. Cleanup.
         remove("temp_dectree.py");

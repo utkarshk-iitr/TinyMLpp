@@ -100,7 +100,7 @@ if __name__ == '__main__':
         }
 
         // 6. Cleanup.
-        // remove("temp_dectree.py");
+        remove("temp_dectree.py");
 
     } catch (const exception &e) {
         cerr << "Error: " << e.what() << endl;

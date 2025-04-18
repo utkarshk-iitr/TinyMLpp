@@ -31,34 +31,28 @@ public:
     LinearRegression(double lr = 0.01, int ep = 1000)
       : learningRate(lr), epochs(ep) {}
 
-    // Splits data, trains on trainData, reports on both splits
+    // Splits data, trains on data, reports on both splits
     void* train(Data &data) {
-        // 1. Split into train/test
-        auto [trainData, testData] = train_test_split(data, DEFAULT_TEST_SIZE, DEFAULT_SEED);
-
-        cout << "Training on " << trainData.features.size()
-             << " samples; testing on " << testData.features.size() << " samples.\n";
-
-        // Use trainData for fitting
-        size_t m = trainData.features.size();
+        // Use data for fitting
+        size_t m = data.features.size();
         if (m == 0) throw runtime_error("No training data available after split");
-        size_t n = trainData.features[0].size();
+        size_t n = data.features[0].size();
 
         // Choose closed-form if single feature
         if (n == 1) {
             double sumX = 0, sumY = 0;
-            for (auto &row : trainData.features) {
+            for (auto &row : data.features) {
                 sumX += toDouble(row[0]);
             }
-            for (auto &t : trainData.target) {
+            for (auto &t : data.target) {
                 sumY += toDouble(t);
             }
             double meanX = sumX / m, meanY = sumY / m;
 
             double num = 0, den = 0;
             for (size_t i = 0; i < m; i++) {
-                double x = toDouble(trainData.features[i][0]);
-                double y = toDouble(trainData.target[i]);
+                double x = toDouble(data.features[i][0]);
+                double y = toDouble(data.target[i]);
                 num += (x - meanX)*(y - meanY);
                 den += (x - meanX)*(x - meanX);
             }
@@ -76,30 +70,30 @@ public:
                 for (size_t i = 0; i < m; ++i) {
                     double pred = theta[0];
                     for (size_t j = 0; j < n; ++j) {
-                        pred += theta[j+1] * toDouble(trainData.features[i][j]);
+                        pred += theta[j+1] * toDouble(data.features[i][j]);
                     }
-                    double err = pred - toDouble(trainData.target[i]);
+                    double err = pred - toDouble(data.target[i]);
                     grad[0] += err;
                     for (size_t j = 0; j < n; ++j) {
-                        grad[j+1] += err * toDouble(trainData.features[i][j]);
+                        grad[j+1] += err * toDouble(data.features[i][j]);
                     }
                 }
                 for (size_t j = 0; j < theta.size(); ++j) {
                     theta[j] -= learningRate * (grad[j] / m);
                 }
                 if (iter % 100 == 0) {
-                    double cost = computeMeanSquaredError(trainData, theta);
+                    double cost = computeMeanSquaredError(data, theta);
                     cout << " Iter " << iter << " Train MSE: " << cost << "\n";
                 }
             }
         }
 
         // 2. Report final train & test MSE
-        double trainMSE = computeMeanSquaredError(trainData, theta);
-        double testMSE  = computeMeanSquaredError(testData, theta);
-        cout << fixed << setprecision(6)
-             << "Final Train MSE: " << trainMSE
-             << " | Test MSE: " << testMSE << "\n";
+        // double trainMSE = computeMeanSquaredError(data, theta);
+        // double testMSE  = computeMeanSquaredError(testData, theta);
+        // cout << fixed << setprecision(6)
+            //  << "Final Train MSE: " << trainMSE << "\n";
+            //  << " | Test MSE: " << testMSE << "\n";
 
         // 3. Return copy of theta
         double *params = new double[theta.size()];

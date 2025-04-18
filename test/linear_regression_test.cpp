@@ -56,6 +56,8 @@ int main(){
         LinearRegression lr(0.01,1000);
         // Compute train/test MSE in C++
         auto [trainD,testD] = train_test_split(data,0.2,42);
+        cout<<"Train set size: "<<trainD.features.size()<<endl;
+        cout<<"Test set size: "<<testD.features.size()<<endl;
         void* raw = lr.train(trainD); 
         double* theta_cpp = static_cast<double*>(raw);
         size_t d = data.features[0].size();

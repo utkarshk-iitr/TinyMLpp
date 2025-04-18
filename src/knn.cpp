@@ -1,26 +1,28 @@
-#ifndef KMEANS_H
-#define KMEANS_H
+#pragma once
+#ifndef KNN_H
+#define KNN_H
 
 #include <iostream>
 #include <vector>
 #include <stdexcept>
-#include <cmath>
-#include <cfloat>
 #include <algorithm>
-#include "base.h"             // Assumes Model is defined here.
-#include "data_handling.h"   // Assumes Data, toDouble(), etc. are defined here.
+#include <map>
+#include "base.h"             // Assuming Model is defined here
+#include "data_handling.h"   // Assuming Data, toDouble(), etc. are defined here
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
 #pragma GCC diagnostic pop
 
-using namespace std;
 using namespace handle;
+namespace plt = matplotlibcpp;
+
+using namespace std;
 
 class KNN : public Model {
 private:
-    Data trainingData; // Storage for the training data.
+    handle::Data trainingData; // Storage for the training data.
     int k;           // Number of closest neighbours to consider.
 
 public:
@@ -43,9 +45,9 @@ public:
      * 
      * @param data The training data.
      */
-    void* train(Data &data) override {
+    void* train(handle::Data &data) override {
         trainingData = data;
-        return nullptr;
+        return nullptr; // No training needed for KNN.
     }
 
     /**
@@ -70,7 +72,7 @@ public:
         for (size_t i = 0; i < m; i++) {
             double distance = 0.0;
             for (size_t j = 0; j < n; j++) {
-                double value = toDouble(trainingData.features[i][j]);
+                double value = handle::toDouble(trainingData.features[i][j]);
                 double diff = value - query[j];
                 distance += diff * diff;
             }
@@ -110,12 +112,12 @@ public:
      * @param data A Data object containing query examples.
      * @return A vector of doubles representing the predicted labels.
      */
-    vector<double> predict(Data &data) {
+    vector<double> predict(handle::Data &data) override {
         vector<double> predictions;
         for (auto &feat : data.features) {
             vector<double> query;
             for (auto &val : feat) {
-                query.push_back(toDouble(val));
+                query.push_back(handle::toDouble(val));
             }
             string label = predictOne(query);
             try {
@@ -126,6 +128,40 @@ public:
         }
         return predictions;
     }
+
+    
+
+    void plotKNNResults(handle::Data& testData, vector<double>& predicted) 
+    {
+        std::vector<double> x_vals_correct, y_vals_correct;
+        std::vector<double> x_vals_wrong, y_vals_wrong;
+
+        for (size_t i = 0; i < testData.features.size(); ++i) {
+            double x = handle::toDouble(testData.features[i][0]);  // Feature 1
+            double y = handle::toDouble(testData.features[i][1]);  // Feature 2
+            double actual = handle::toDouble(testData.target[i]);
+            double pred = predicted[i];
+
+            if (actual == pred) {
+                x_vals_correct.push_back(x);
+                y_vals_correct.push_back(y);
+            } else {
+                x_vals_wrong.push_back(x);
+                y_vals_wrong.push_back(y);
+            }
+        }
+
+        plt::figure_size(800, 600);
+        plt::scatter(x_vals_correct, y_vals_correct, 30.0, {{"color", "green"}, {"label", "Correct"}});
+        plt::scatter(x_vals_wrong, y_vals_wrong, 30.0, {{"color", "red"}, {"label", "Incorrect"}});
+        plt::xlabel("Feature 1");
+        plt::ylabel("Feature 2");
+        plt::title("KNN Classification Results");
+        plt::legend();
+        plt::grid(true);
+        plt::show();
+    }
+
     
     /**
      * @brief Alternative prediction method.
@@ -135,12 +171,12 @@ public:
      * @param data A Data object containing query examples.
      * @return A vector of strings representing the predicted labels.
      */
-    vector<string> predictLabel(Data &data) {
+    vector<string> predictLabel(handle::Data &data) {
         vector<string> predictions;
         for (auto &feat : data.features) {
             vector<double> query;
             for (auto &val : feat) {
-                query.push_back(toDouble(val));
+                query.push_back(handle::toDouble(val));
             }
             predictions.push_back(predictOne(query));
         }

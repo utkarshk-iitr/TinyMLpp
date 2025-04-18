@@ -54,7 +54,9 @@ int main(){
 
         // 2. Train C++ model (internally splits 80/20, seed 42)
         LinearRegression lr(0.01,1000);
-        void* raw = lr.train(data); 
+        // Compute train/test MSE in C++
+        auto [trainD,testD] = train_test_split(data,0.2,42);
+        void* raw = lr.train(trainD); 
         double* theta_cpp = static_cast<double*>(raw);
         size_t d = data.features[0].size();
 
@@ -66,15 +68,14 @@ int main(){
             cout<<" θ["<<i<<"]="<<cppTheta[i]<<endl;
         }
 
-        // Compute train/test MSE in C++
-        auto [trainD,testD] = train_test_split(data,0.2,42);
+        
         double mse_tr_cpp = computeMeanSquaredError(trainD, cppTheta);
         double mse_te_cpp = computeMeanSquaredError(testD,  cppTheta);
         cout<<fixed<<setprecision(6)
             <<"C++ Train MSE="<<mse_tr_cpp<<" | Test MSE="<<mse_te_cpp<<endl;
 
-        // Full-data predictions
-        vector<double> pred_cpp = lr.predict(data);
+        //Predictions on the test set
+        vector<double> pred_cpp = lr.predict(testD);
 
         // 3. Write corrected Python snippet (no sigmoid)
         ofstream py("temp_linreg.py");
@@ -114,7 +115,7 @@ def main():
     mse_tr = float(((Xbt.dot(theta)-yt)**2).mean())/2
     mse_te = float(((Xbs.dot(theta)-ys)**2).mean())/2
     # Full-data preds
-    Xbf = np.hstack([np.ones((len(Xn),1)), Xn])
+    Xbf = np.hstack([np.ones((len(Xs),1)), Xs])
     preds = Xbf.dot(theta).flatten()
     # Print: θ, train MSE, test MSE, full preds
     print(" ".join(map(str,theta.flatten())))
@@ -164,6 +165,9 @@ if __name__=="__main__":
             cout<<"\nPY pred:";  for(auto v:pred_py) cout<<" "<<v;
             cout<<endl;
         }
+
+        // 8. Plot the regression line
+        lr.plotLinearRegression(testD, cppTheta);
 
         // Cleanup
         remove("temp_linreg.py");

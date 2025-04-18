@@ -56,7 +56,8 @@ int main() {
 
         // 2. Train C++ DecisionTree.
         DecisionTree dt(/*maxDepth=*/5, /*minSamplesSplit=*/2);
-        auto root = dt.train(data);
+        DecisionTree::Node* root = static_cast<DecisionTree::Node*>(dt.train(data));
+        
         vector<double> cppPreds = dt.predict(data);
 
         // 3. Write Python test script.

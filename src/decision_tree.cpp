@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <queue>
 #include <tuple>
 #include "base.h"
 #include "data_handling.h"
@@ -35,7 +36,7 @@ public:
     DecisionTree(int maxDepth = 5, int minSamplesSplit = 2, double lr = 0.01, int ep = 100)
         : Model(lr, ep), root(nullptr), maxDepth(maxDepth), minSamplesSplit(minSamplesSplit) {}
 
-    Node* train(handle::Data &data) {
+    void* train(handle::Data &data) {
         size_t m = data.features.size();
         if (m == 0) throw std::runtime_error("No data available");
         size_t n = data.features[0].size();
@@ -49,7 +50,7 @@ public:
         }
     
         root = buildTree(X, y, 0);
-        return root;
+        return static_cast<void*>(root);
     }
 
 
@@ -73,8 +74,68 @@ public:
     }
 
 
-    void plotTree(Node* root){
-        cout<<"Hello"<<endl;
+    void collectTreeLayout(Node* root, std::map<Node*, std::pair<int, int>>& positions, int depth = 0, int& xOffset = *(new int(0))) {
+        if (!root) return;
+        collectTreeLayout(root->left, positions, depth + 1, xOffset);
+        positions[root] = {xOffset++, -depth};   
+        collectTreeLayout(root->right, positions, depth + 1, xOffset);
+    }
+    
+    void plotTree(Node* root) {
+        if (!root) return;
+        Gnuplot gp;
+    
+        std::map<Node*, std::pair<int, int>> positions;
+        int xOffset = 0;
+        collectTreeLayout(root, positions, 0, xOffset);
+    
+        // Store nodes and edges
+        std::vector<std::tuple<int, int, std::string>> nodes; // x, y, label
+        std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> edges; // (x1,y1)->(x2,y2)
+    
+        for (const auto& pair : positions) {
+            Node* node = pair.first;
+            int x = pair.second.first;
+            int y = pair.second.second;
+    
+            std::string label;
+            if (node->isLeaf)
+                label = node->label;
+            else
+                label = "x" + std::to_string(node->featureIndex) + " <= " + std::to_string(node->threshold);
+    
+            nodes.emplace_back(x, y, label);
+    
+            if (node->left) {
+                auto childPos = positions[node->left];
+                edges.push_back({{x, y}, {childPos.first, childPos.second}});
+            }
+            if (node->right) {
+                auto childPos = positions[node->right];
+                edges.push_back({{x, y}, {childPos.first, childPos.second}});
+            }
+        }
+    
+        // Plot nodes
+        gp << "set title 'Decision Tree'\n";
+        gp << "set size ratio -1\n";
+        gp << "set xrange [-1:" << xOffset + 1 << "]\n";
+        gp << "set yrange [-" << positions[root].second + 3 << ":1]\n";
+        gp << "unset key\n";
+        gp << "set label font ',10'\n";
+        gp << "set term qt 0\n";
+        gp << "plot '-' using 1:2:3 with labels offset 1,1 notitle, '-' with lines lt rgb 'blue' notitle\n";
+        
+        gp.send1d(nodes); // Send labels
+    
+        // Convert edges into line segments
+        std::vector<std::pair<double, double>> lines;
+        for (auto& e : edges) {
+            lines.push_back({e.first.first, e.first.second});
+            lines.push_back({e.second.first, e.second.second});
+            lines.push_back({NAN, NAN}); // break line
+        }
+        gp.send1d(lines);
     }
 
 private:
@@ -161,35 +222,6 @@ private:
         freeTree(node->left);
         freeTree(node->right);
         delete node;
-    }
-
-    // Helpers for plotting
-    void assignPositions(Node* node, int depth, std::map<Node*, double> &xpos, int &counter) {
-        if (!node) return;
-        assignPositions(node->left,  depth+1, xpos, counter);
-        xpos[node] = counter++;
-        assignPositions(node->right, depth+1, xpos, counter);
-    }
-
-    void collectPlotData(Node* node, int depth,const std::map<Node*, double> &xpos,std::vector<std::tuple<double,double,std::string>> &nodes,std::vector<std::tuple<double,double,double,double>> &edges) {
-        if (!node) return;
-        double x = xpos.at(node), y = -depth;
-
-        std::string lbl = node->isLeaf ? "Leaf: " + std::to_string(node->prediction): "x"+std::to_string(node->featureIndex)+" <= "+std::to_string(node->threshold);
-        nodes.emplace_back(x,y,lbl);
-
-        if (!node->isLeaf) {
-            if (node->left) {
-                double x2=xpos.at(node->left), y2=-(depth+1);
-                edges.emplace_back(x,y,x2-x,y2-y);
-            }
-            if (node->right) {
-                double x2=xpos.at(node->right), y2=-(depth+1);
-                edges.emplace_back(x,y,x2-x,y2-y);
-            }
-        }
-        collectPlotData(node->left,  depth+1, xpos, nodes, edges);
-        collectPlotData(node->right, depth+1, xpos, nodes, edges);
     }
 };
 

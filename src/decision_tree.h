@@ -8,7 +8,7 @@
 #include <tuple>
 #include "base.h"
 #include "data_handling.h"
-// #include <gnuplot-iostream.h>
+#include <gnuplot-iostream.h>
 
 class DecisionTree : public Model {
 public:

@@ -149,3 +149,57 @@ void DecisionTree::freeTree(Node* node) {
 DecisionTree::~DecisionTree() {
     freeTree(root);
 }
+
+// Plotting helpers
+void DecisionTree::assignPositions(Node* node, int depth, std::map<Node*, double> &xpos, int &counter) {
+    if (!node) return;
+    assignPositions(node->left, depth+1, xpos, counter);
+    xpos[node] = counter++;
+    assignPositions(node->right, depth+1, xpos, counter);
+}
+
+void DecisionTree::collectPlotData(Node* node, int depth,
+                                   const std::map<Node*, double> &xpos,
+                                   std::vector<std::tuple<double,double,std::string>> &nodes,
+                                   std::vector<std::tuple<double,double,double,double>> &edges) {
+    if (!node) return;
+    double x = xpos.at(node);
+    double y = -depth;
+    std::string label;
+    if (node->isLeaf) {
+        label = std::to_string(node->prediction);
+    } else {
+        label = "x" + std::to_string(node->featureIndex) + "<=" + std::to_string(node->threshold);
+        if (node->left) {
+            double x2 = xpos.at(node->left);
+            double y2 = -(depth+1);
+            edges.emplace_back(x, y, x2-x, y2-y);
+        }
+        if (node->right) {
+            double x2 = xpos.at(node->right);
+            double y2 = -(depth+1);
+            edges.emplace_back(x, y, x2-x, y2-y);
+        }
+    }
+    nodes.emplace_back(x, y, label);
+    collectPlotData(node->left, depth+1, xpos, nodes, edges);
+    collectPlotData(node->right, depth+1, xpos, nodes, edges);
+}
+
+void DecisionTree::plotTree(const std::string &outputFilename) {
+    std::map<Node*, double> xpos;
+    int counter = 0;
+    assignPositions(root, 0, xpos, counter);
+
+    std::vector<std::tuple<double,double,std::string>> nodes;
+    std::vector<std::tuple<double,double,double,double>> edges;
+    collectPlotData(root, 0, xpos, nodes, edges);
+
+    Gnuplot gp;
+    gp << "set term png size 800,600\n";
+    gp << "set output '" << outputFilename << "'\n";
+    gp << "unset key\n";
+    gp << "plot '-' with vectors nohead notitle, '-' using 1:2:3:4 with labels offset char 0,0 center notitle\n";
+    gp.send1d(edges);
+    gp.send1d(nodes);
+}

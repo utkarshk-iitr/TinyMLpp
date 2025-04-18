@@ -1,4 +1,4 @@
-// test_decision_tree.cpp
+// Decision Tree Test Program
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -11,8 +11,7 @@
 #include <cmath>
 #include <string>
 #include "../src/data_handling.h"   // Data definitions and utilities
-// #include "../src/decision_tree.cpp" // DecisionTree implementation
-#include "../src/decision_tree.h" // DecisionTree implementation
+#include "../src/decision_tree.h"   // DecisionTree definitions and gnuplot plotting
 
 using namespace std;
 using namespace handle;
@@ -57,7 +56,7 @@ int main() {
 
         // 2. Train C++ DecisionTree.
         DecisionTree dt(/*maxDepth=*/5, /*minSamplesSplit=*/2);
-        void* treePtr = dt.train(data);
+        dt.train(data);
         vector<double> cppPreds = dt.predict(data);
 
         // 3. Write Python test script.
@@ -99,7 +98,12 @@ if __name__ == '__main__':
             cout << endl;
         }
 
-        // 6. Cleanup.
+        // 6. Plot the trained tree.
+        string plotFile = "decision_tree.png";
+        dt.plotTree(plotFile);
+        cout << "Decision tree plot saved to '" << plotFile << "'." << endl;
+
+        // 7. Cleanup.
         remove("temp_dectree.py");
 
     } catch (const exception &e) {

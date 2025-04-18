@@ -3,8 +3,12 @@
 #define DECISION_TREE_H
 
 #include <vector>
+#include <string>
+#include <map>
+#include <tuple>
 #include "base.h"
 #include "data_handling.h"
+// #include <gnuplot-iostream.h>
 
 class DecisionTree : public Model {
 public:
@@ -49,6 +53,11 @@ public:
      * @brief Destructor to free allocated nodes.
      */
     ~DecisionTree();
+    /**
+     * @brief Plot the trained tree structure using gnuplot.
+     * Generates a PNG file at the specified output path.
+     */
+    void plotTree(const std::string &outputFilename = "decision_tree.png");
 
 private:
     Node* root;
@@ -81,6 +90,13 @@ private:
      * @brief Traverse the tree to make a single prediction.
      */
     double traverse(Node* node, const std::vector<double> &x);
+
+    // Helpers for plotting
+    void assignPositions(Node* node, int depth, std::map<Node*, double> &xpos, int &counter);
+    void collectPlotData(Node* node, int depth,
+                         const std::map<Node*, double> &xpos,
+                         std::vector<std::tuple<double,double,std::string>> &nodes,
+                         std::vector<std::tuple<double,double,double,double>> &edges);
 };
 
 #endif // DECISION_TREE_H

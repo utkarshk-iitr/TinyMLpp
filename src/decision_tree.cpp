@@ -2,7 +2,7 @@
 #include "decision_tree.h"
 #include <algorithm>
 #include <limits>
-
+#include <gnuplot-iostream.h>
 using namespace handle;
 
 void* DecisionTree::train(handle::Data &data) {

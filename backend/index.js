@@ -56,7 +56,7 @@ app.post('/train', (req, res) => {
 		const formattedParameters = Object.entries(parameters)
 			.map(([key, value]) => `${key}=${value}`)
 			.join(',');
-		const command = `./demo --model "${algorithm}" --parameters "${formattedParameters}" --dataset "${datasetPath}"`;
+		const command = `./demo --model "${algorithm}" --parameters "${formattedParameters},dataset=${datasetPath}"`;
 		console.log(command);
 		exec(command, (error, stdout, stderr) => {
 			if (error) {
@@ -67,7 +67,7 @@ app.post('/train', (req, res) => {
 				console.error(`Error output: ${stderr}`);
 				return res.status(500).send(`Error: ${stderr}`);
 			}
-
+			console.log(`Command output: ${stdout}`);
 			// Send the command output as the response
 			res.status(200).send({
 				message: 'Training completed successfully.',

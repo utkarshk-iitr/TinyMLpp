@@ -760,7 +760,7 @@ const initModelManager = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    algorithm: currentAlgorithm,
+                    algorithm: formatAlgorithmName(currentAlgorithm),
                     parameters: requiredParams,
                     dataset: datasetContent
                 })
@@ -874,9 +874,10 @@ const initModelManager = () => {
 
     // Helper function to format algorithm name
     const formatAlgorithmName = (algorithm) => {
-        return algorithm.split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+        return algorithm.replace(/-/g, '_')
+            .split('_')
+            .map(word => word.charAt(0) + word.slice(1))
+            .join('_');
     };
 
     // Show detailed training results

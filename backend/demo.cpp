@@ -212,16 +212,21 @@ int main(int argc, char** argv) {
         js << "{\n";
         js << "  \"time_ms\": "   << time_ms    << ",\n";
         js << "  \"memory_kb\": " << peakRSS_kb << ",\n";
-        js << "  \"accuracy\": "  << accuracy*100   << ",\n";
-        if (modelName != "k_means_clustering" && modelName != "linear_regression") {
-            js << "  \"precision\": " << precision*100 << ",\n";
-            js << "  \"recall\": "    << recall*100    << ",\n";
-            js << "  \"f1_score\": "  << f1*100        << "\n";
-        }
-        
+
         if (modelName == "k_means_clustering") {
             js << "  \"inertia\": " << inertia << "\n";
+        } 
+        else if (modelName == "linear_regression") {
+            js << "  \"accuracy\": "  << accuracy*100   << "\n";
+            // js << "  \"mse\": "       << mse            << "\n";
+        } 
+        else {
+            js << "  \"accuracy\": "  << accuracy*100   << ",\n";
+            js << "  \"precision\": " << precision*100  << ",\n";
+            js << "  \"recall\": "    << recall*100     << ",\n";
+            js << "  \"f1_score\": "  << f1*100         << "\n";
         }
+
         js << "}\n";
         js.close();
 

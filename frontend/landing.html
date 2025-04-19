@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TinyML - Welcome</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #00d2ff;
+            --dark-bg: #0a0a1a;
+            --darker-bg: #050510;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .landing-container {
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Enhanced Background Animations */
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Gradient Waves with Rotation */
+        .gradient-waves {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 30% 70%, rgba(0, 210, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(74, 144, 226, 0.1) 0%, transparent 50%);
+            animation: rotateGradient 30s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes rotateGradient {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* Animated Grid */
+        .animated-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Animated Paths */
+        .animated-paths {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .path {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            height: 1px;
+            width: 200%;
+            animation: pathAnimation 8s infinite linear;
+            opacity: 0.1;
+        }
+
+        .path:nth-child(1) { top: 20%; animation-delay: 0s; transform: rotate(5deg); }
+        .path:nth-child(2) { top: 40%; animation-delay: 2s; transform: rotate(-5deg); }
+        .path:nth-child(3) { top: 60%; animation-delay: 4s; transform: rotate(3deg); }
+        .path:nth-child(4) { top: 80%; animation-delay: 6s; transform: rotate(-3deg); }
+
+        @keyframes pathAnimation {
+            0% { transform: translateX(-100%) rotate(var(--rotation)); }
+            100% { transform: translateX(0%) rotate(var(--rotation)); }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatParticle 15s infinite linear;
+        }
+
+        /* First set of particles */
+        .particle:nth-child(1) { width: 3px; height: 3px; left: 10%; animation-duration: 20s; }
+        .particle:nth-child(2) { width: 2px; height: 2px; left: 20%; animation-duration: 15s; animation-delay: 2s; }
+        .particle:nth-child(3) { width: 4px; height: 4px; left: 30%; animation-duration: 18s; animation-delay: 4s; }
+        .particle:nth-child(4) { width: 2px; height: 2px; left: 40%; animation-duration: 12s; animation-delay: 1s; }
+        .particle:nth-child(5) { width: 3px; height: 3px; left: 50%; animation-duration: 16s; animation-delay: 3s; }
+        .particle:nth-child(6) { width: 2px; height: 2px; left: 60%; animation-duration: 14s; animation-delay: 5s; }
+        .particle:nth-child(7) { width: 4px; height: 4px; left: 70%; animation-duration: 19s; animation-delay: 2s; }
+        .particle:nth-child(8) { width: 3px; height: 3px; left: 80%; animation-duration: 17s; animation-delay: 4s; }
+
+        /* Additional particles */
+        .particle:nth-child(9) { width: 2px; height: 2px; left: 15%; animation-duration: 13s; animation-delay: 1s; }
+        .particle:nth-child(10) { width: 3px; height: 3px; left: 25%; animation-duration: 16s; animation-delay: 3s; }
+        .particle:nth-child(11) { width: 4px; height: 4px; left: 35%; animation-duration: 19s; animation-delay: 5s; }
+        .particle:nth-child(12) { width: 2px; height: 2px; left: 45%; animation-duration: 14s; animation-delay: 2s; }
+        .particle:nth-child(13) { width: 3px; height: 3px; left: 55%; animation-duration: 17s; animation-delay: 4s; }
+        .particle:nth-child(14) { width: 4px; height: 4px; left: 65%; animation-duration: 20s; animation-delay: 1s; }
+        .particle:nth-child(15) { width: 2px; height: 2px; left: 75%; animation-duration: 15s; animation-delay: 3s; }
+        .particle:nth-child(16) { width: 3px; height: 3px; left: 85%; animation-duration: 18s; animation-delay: 5s; }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(50vh) scale(1) rotate(180deg);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(0) scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Glowing Orbs */
+        .glowing-orbs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.1;
+            animation: orbFloat 20s infinite ease-in-out;
+        }
+
+        /* Primary orbs */
+        .orb:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: var(--primary-color);
+            top: 20%;
+            left: 20%;
+            animation-duration: 15s;
+        }
+
+        .orb:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            background: var(--secondary-color);
+            top: 60%;
+            left: 70%;
+            animation-duration: 20s;
+            animation-delay: 5s;
+        }
+
+        /* Additional orbs */
+        .orb:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            background: var(--primary-color);
+            top: 40%;
+            left: 10%;
+            animation-duration: 18s;
+            animation-delay: 3s;
+        }
+
+        .orb:nth-child(4) {
+            width: 180px;
+            height: 180px;
+            background: var(--secondary-color);
+            top: 80%;
+            left: 30%;
+            animation-duration: 22s;
+            animation-delay: 7s;
+        }
+
+        .orb:nth-child(5) {
+            width: 220px;
+            height: 220px;
+            background: var(--primary-color);
+            top: 10%;
+            left: 80%;
+            animation-duration: 17s;
+            animation-delay: 2s;
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            50% {
+                transform: translate(50px, 50px) scale(1.2) rotate(180deg);
+            }
+            100% {
+                transform: translate(0, 0) scale(1) rotate(360deg);
+            }
+        }
+
+        /* Interactive Background Elements */
+        .interactive-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .interactive-element {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: pulse 4s infinite ease-in-out;
+            transition: transform 0.3s ease;
+        }
+
+        .interactive-element:nth-child(1) {
+            top: 30%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .interactive-element:nth-child(2) {
+            top: 60%;
+            left: 70%;
+            animation-delay: 1s;
+        }
+
+        .interactive-element:nth-child(3) {
+            top: 40%;
+            left: 50%;
+            animation-delay: 2s;
+        }
+
+        /* Mouse Follow Effect */
+        .mouse-follow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(74, 144, 226, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: transform 0.15s ease;
+        }
+
+        /* Interactive Grid */
+        .interactive-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform-origin: center;
+            transition: transform 0.2s ease;
+        }
+
+        /* Interactive Particles */
+        .interactive-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+            transition: transform 0.2s ease;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem;
+            z-index: 100;
+            background: rgba(10, 10, 26, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Main Content */
+        .content {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .hero {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .cta-button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .primary-button {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .secondary-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Features Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature p {
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            z-index: 2;
+            background: var(--darker-bg);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-text {
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <!-- Enhanced Background Animations -->
+        <div class="background-animation">
+            <div class="gradient-waves"></div>
+            <div class="animated-grid"></div>
+            <div class="interactive-grid"></div>
+            <div class="animated-paths">
+                <div class="path"></div>
+                <div class="path"></div>
+                <div class="path"></div>
+                <div class="path"></div>
+            </div>
+            <div class="particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+            <div class="glowing-orbs">
+                <div class="orb"></div>
+                <div class="orb"></div>
+                <div class="orb"></div>
+                <div class="orb"></div>
+                <div class="orb"></div>
+            </div>
+            <div class="interactive-elements">
+                <div class="interactive-element"></div>
+                <div class="interactive-element"></div>
+                <div class="interactive-element"></div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-content">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <span>TinyML</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#about">About</a>
+                    <a href="#contact">Contact</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="content">
+            <div class="hero">
+                <h1>Welcome to TinyML</h1>
+                <p class="subtitle">Efficient machine learning for embedded systems. Transform your edge devices with powerful AI capabilities.</p>
+                <div class="cta-buttons">
+                    <a href="index.html" class="cta-button primary-button">Enter Dashboard</a>
+                    <a href="#features" class="cta-button secondary-button">Learn More</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <div class="feature">
+                <i class="fas fa-microchip"></i>
+                <h3>Edge Computing</h3>
+                <p>Run ML models directly on edge devices with minimal latency and maximum efficiency.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-chart-line"></i>
+                <h3>Real-time Analytics</h3>
+                <p>Get instant insights from your data with powerful visualization tools and dashboards.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-cogs"></i>
+                <h3>Easy Integration</h3>
+                <p>Seamlessly integrate with your existing systems and workflows with our developer-friendly API.</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="social-links">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="footer-text">© 2024 TinyML. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.landing-container');
+            const mouseFollow = document.createElement('div');
+            mouseFollow.className = 'mouse-follow';
+            container.appendChild(mouseFollow);
+
+            const interactiveGrid = document.querySelector('.interactive-grid');
+            
+            // Create more interactive particles
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'interactive-particle';
+                // Distribute particles more evenly
+                const angle = (i / 50) * Math.PI * 2;
+                const radius = Math.random() * 0.4 + 0.3; // Random radius between 0.3 and 0.7
+                particle.style.left = `${50 + Math.cos(angle) * radius * 50}%`;
+                particle.style.top = `${50 + Math.sin(angle) * radius * 50}%`;
+                container.appendChild(particle);
+            }
+
+            let lastX = 0;
+            let lastY = 0;
+            let velocityX = 0;
+            let velocityY = 0;
+
+            // Mouse move effect with velocity
+            document.addEventListener('mousemove', (e) => {
+                const { clientX, clientY } = e;
+                const { left, top } = container.getBoundingClientRect();
+                
+                // Calculate velocity
+                velocityX = clientX - lastX;
+                velocityY = clientY - lastY;
+                lastX = clientX;
+                lastY = clientY;
+                
+                // Update mouse follow position with velocity
+                const followX = clientX - left;
+                const followY = clientY - top;
+                mouseFollow.style.left = `${followX}px`;
+                mouseFollow.style.top = `${followY}px`;
+                mouseFollow.style.transform = `translate(-50%, -50%) scale(${1 + Math.sqrt(velocityX * velocityX + velocityY * velocityY) / 100})`;
+
+                // Update grid position with reduced sensitivity
+                const moveX = (clientX - left - window.innerWidth / 2) / 80; // Reduced from 50 to 80
+                const moveY = (clientY - top - window.innerHeight / 2) / 80;
+                interactiveGrid.style.transform = `translate(${moveX}px, ${moveY}px)`;
+
+                // Update particles position with improved physics
+                const particles = document.querySelectorAll('.interactive-particle');
+                particles.forEach((particle, index) => {
+                    const particleX = parseFloat(particle.style.left) / 100 * window.innerWidth;
+                    const particleY = parseFloat(particle.style.top) / 100 * window.innerHeight;
+                    const distanceX = clientX - left - particleX;
+                    const distanceY = clientY - top - particleY;
+                    const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+                    
+                    if (distance < 300) { // Increased interaction radius from 200 to 300
+                        const angle = Math.atan2(distanceY, distanceX);
+                        const force = Math.pow((300 - distance) / 300, 2); // Quadratic falloff
+                        const moveX = Math.cos(angle) * force * 30; // Increased from 20 to 30
+                        const moveY = Math.sin(angle) * force * 30;
+                        
+                        // Add velocity influence
+                        const velocityInfluence = 0.5;
+                        const finalMoveX = moveX + velocityX * velocityInfluence;
+                        const finalMoveY = moveY + velocityY * velocityInfluence;
+                        
+                        particle.style.transform = `translate(${finalMoveX}px, ${finalMoveY}px)`;
+                    } else {
+                        // Smooth return to original position
+                        particle.style.transform = 'translate(0, 0)';
+                    }
+                });
+            });
+
+            // Mouse enter/leave effect
+            container.addEventListener('mouseenter', () => {
+                mouseFollow.style.opacity = '1';
+            });
+
+            container.addEventListener('mouseleave', () => {
+                mouseFollow.style.opacity = '0';
+                // Reset particles position
+                const particles = document.querySelectorAll('.interactive-particle');
+                particles.forEach(particle => {
+                    particle.style.transform = 'translate(0, 0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

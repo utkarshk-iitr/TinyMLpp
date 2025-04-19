@@ -76,55 +76,6 @@
                     </div>
                 </div>
 
-                <!-- Stats Overview -->
-                <div class="stats-overview">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-microchip"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Performance</h3>
-                            <div class="stat-value">95<span class="unit">%</span></div>
-                            <div class="stat-progress">
-                                <div class="progress-bar" style="width: 95%"></div>
-                            </div>
-                            <div class="stat-comparison">
-                                <span class="better">+12% vs Python</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-memory"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Memory Usage</h3>
-                            <div class="stat-value">2.5<span class="unit">MB</span></div>
-                            <div class="stat-progress">
-                                <div class="progress-bar" style="width: 30%"></div>
-                            </div>
-                            <div class="stat-comparison">
-                                <span class="better">-45% vs Python</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Training Time</h3>
-                            <div class="stat-value">0.8<span class="unit">s</span></div>
-                            <div class="stat-progress">
-                                <div class="progress-bar" style="width: 20%"></div>
-                            </div>
-                            <div class="stat-comparison">
-                                <span class="better">-65% vs Python</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Algorithm Selection -->
                 <section id="train" class="dashboard-card">
                     <div class="card-header">
@@ -136,6 +87,26 @@
                     </div>
                     <div class="card-content">
                         <div class="train-model-section">
+                            <!-- File Upload Section -->
+                            <div class="file-upload-section">
+                                <h3>Upload Dataset</h3>
+                                <div class="upload-container">
+                                    <div class="upload-area" id="dropZone">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Drag and drop your dataset here</p>
+                                        <span>or</span>
+                                        <label for="fileInput" class="upload-btn">
+                                            <i class="fas fa-folder-open"></i>
+                                            Browse Files
+                                        </label>
+                                        <input type="file" id="fileInput" accept=".csv,.json,.xlsx" multiple hidden>
+                                    </div>
+                                    <div class="file-list" id="fileList">
+                                        <!-- Files will be listed here -->
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="algorithm-selection">
                                 <h3>Select Algorithm</h3>
                                 <div class="algorithm-cards">
@@ -216,10 +187,6 @@
                             <div class="results-section">
                                 <div id="model-results" class="model-results">
                                     <!-- Results will be dynamically inserted here -->
-                                </div>
-                                <div id="model-history" class="model-history">
-                                    <h3>Training History</h3>
-                                    <!-- History items will be dynamically inserted here -->
                                 </div>
                             </div>
                         </div>

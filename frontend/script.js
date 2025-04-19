@@ -112,20 +112,59 @@ function initCharts() {
 }
 
 function initVisualizationChart() {
-    const visualizationContainer = document.getElementById('visualization-chart');
-    if (!visualizationContainer) return;
-
-    // Set initial placeholder text
-    visualizationContainer.innerHTML = '<p style="text-align: center; color: gray;">Visualization will appear here</p>';
-
+    const ctx = document.getElementById('visualization-chart');
+    if (!ctx) return;
+    
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Class A',
+                data: generateRandomPoints(20, 10, 20, 10, 20),
+                backgroundColor: 'rgba(91, 134, 229, 0.6)',
+                borderColor: 'rgba(91, 134, 229, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }, {
+                label: 'Class B',
+                data: generateRandomPoints(20, 30, 40, 30, 40),
+                backgroundColor: 'rgba(56, 178, 172, 0.6)',
+                borderColor: 'rgba(56, 178, 172, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
 }
-// Function to update the chart with an image
-function updateVisualizationWithImage(imageSrc) {
-    visualizationContainer.innerHTML = `<img src="${imageSrc}" alt="Visualization" style="max-width: 100%; height: auto;">`;
-}
-
-// Example usage: Call this function with an image source when needed
-// updateVisualizationWithImage('path/to/your/image.png');
 
 function initComparisonChart() {
     const ctx = document.getElementById('comparison-chart');
@@ -220,108 +259,88 @@ function updateParameterForm(algorithm) {
     const parameterForm = document.getElementById('parameter-form');
     if (!parameterForm) return;
     
-    let html = '';
+    let formHTML = '';
     
     switch(algorithm) {
         case 'linear-regression':
-            html = `
-                <div class="parameter-group">
-                    <label>Learning Rate</label>
-                    <div class="parameter-input">
-                        <input type="range" min="0.001" max="1" step="0.001" value="0.01" id="learning-rate">
-                        <span class="parameter-value">0.01</span>
-                    </div>
+            formHTML = `
+                <div class="form-group">
+                    <label for="learning-rate">Learning Rate</label>
+                    <input type="range" id="learning-rate" min="0.001" max="0.1" step="0.001" value="0.01">
+                    <span class="value-display">0.01</span>
                 </div>
-                <div class="parameter-group">
-                    <label>Epochs</label>
-                    <div class="parameter-input">
-                        <input type="range" min="10" max="1000" step="10" value="100" id="epochs">
-                        <span class="parameter-value">100</span>
-                    </div>
+                <div class="form-group">
+                    <label for="epochs">Epochs</label>
+                    <input type="range" id="epochs" min="100" max="1000" step="100" value="500">
+                    <span class="value-display">500</span>
                 </div>
             `;
             break;
         case 'logistic-regression':
-            html = `
-                <div class="parameter-group">
-                    <label>Learning Rate</label>
-                    <div class="parameter-input">
-                        <input type="range" min="0.001" max="1" step="0.001" value="0.01" id="learning-rate">
-                        <span class="parameter-value">0.01</span>
-                    </div>
+            formHTML = `
+                <div class="form-group">
+                    <label for="learning-rate">Learning Rate</label>
+                    <input type="range" id="learning-rate" min="0.001" max="0.1" step="0.001" value="0.01">
+                    <span class="value-display">0.01</span>
                 </div>
-                <div class="parameter-group">
-                    <label>Epochs</label>
-                    <div class="parameter-input">
-                        <input type="range" min="10" max="1000" step="10" value="100" id="epochs">
-                        <span class="parameter-value">100</span>
-                    </div>
+                <div class="form-group">
+                    <label for="epochs">Epochs</label>
+                    <input type="range" id="epochs" min="100" max="1000" step="100" value="500">
+                    <span class="value-display">500</span>
                 </div>
             `;
             break;
         case 'knn':
-            html = `
-                <div class="parameter-group">
-                    <label>Number of Neighbors (k)</label>
-                    <div class="parameter-input">
-                        <input type="range" min="1" max="20" value="5" id="k-value">
-                        <span class="parameter-value">5</span>
-                    </div>
+            formHTML = `
+                <div class="form-group">
+                    <label for="k">Number of Neighbors (k)</label>
+                    <input type="range" id="k" min="1" max="20" step="1" value="5">
+                    <span class="value-display">5</span>
                 </div>
             `;
             break;
         case 'k-means':
-            html = `
-                <div class="parameter-group">
-                    <label>Number of Clusters (k)</label>
-                    <div class="parameter-input">
-                        <input type="range" min="2" max="10" value="3" id="k-value">
-                        <span class="parameter-value">3</span>
-                    </div>
+            formHTML = `
+                <div class="form-group">
+                    <label for="k">Number of Clusters (k)</label>
+                    <input type="range" id="k" min="2" max="10" step="1" value="3">
+                    <span class="value-display">3</span>
                 </div>
-                <div class="parameter-group">
-                    <label>Max Iterations</label>
-                    <div class="parameter-input">
-                        <input type="range" min="10" max="500" step="10" value="100" id="max-iterations">
-                        <span class="parameter-value">100</span>
-                    </div>
+                <div class="form-group">
+                    <label for="max-iterations">Max Iterations</label>
+                    <input type="range" id="max-iterations" min="100" max="1000" step="100" value="300">
+                    <span class="value-display">300</span>
                 </div>
             `;
             break;
         case 'decision-tree':
-            html = `
-                <div class="parameter-group">
-                    <label>Max Depth</label>
-                    <div class="parameter-input">
-                        <input type="range" min="1" max="20" value="5" id="depth-value">
-                        <span class="parameter-value">5</span>
-                    </div>
+            formHTML = `
+                <div class="form-group">
+                    <label for="max-depth">Max Depth</label>
+                    <input type="range" id="max-depth" min="1" max="20" step="1" value="5">
+                    <span class="value-display">5</span>
                 </div>
-                <div class="parameter-group">
-                    <label>Min Samples Split</label>
-                    <div class="parameter-input">
-                        <input type="range" min="2" max="20" value="2" id="min-samples-split">
-                        <span class="parameter-value">2</span>
-                    </div>
+                <div class="form-group">
+                    <label for="min-samples-split">Min Samples Split</label>
+                    <input type="range" id="min-samples-split" min="2" max="20" step="1" value="2">
+                    <span class="value-display">2</span>
                 </div>
             `;
             break;
         case 'svm':
-            html = `
-                <div class="parameter-group">
-                    <label>Regularization Parameter (C)</label>
-                    <div class="parameter-input">
-                        <input type="range" min="0.1" max="10" step="0.1" value="1" id="c-value">
-                        <span class="parameter-value">1</span>
-                    </div>
+            formHTML = `
+                <div class="form-group">
+                    <label for="c">Regularization Parameter (C)</label>
+                    <input type="range" id="c" min="0.1" max="10" step="0.1" value="1">
+                    <span class="value-display">1</span>
                 </div>
             `;
             break;
         default:
-            html = '<p>Please select an algorithm</p>';
+            formHTML = '<p>Please select an algorithm</p>';
     }
     
-    parameterForm.innerHTML = html;
+    parameterForm.innerHTML = formHTML;
     initRangeSliders();
     
     // Add fade-in animation
@@ -524,9 +543,9 @@ const initModelManager = () => {
     const parameterForm = document.getElementById('parameter-form');
     const trainButton = document.getElementById('train-button');
     const modelResults = document.getElementById('model-results');
-    const modelHistory = document.getElementById('model-history');
+    const historyList = document.querySelector('.history-list');
 
-    if (!algorithmCards.length || !parameterForm || !trainButton || !modelResults || !modelHistory) {
+    if (!algorithmCards.length || !parameterForm || !trainButton || !modelResults || !historyList) {
         console.error('Required elements not found');
         return;
     }
@@ -562,11 +581,6 @@ const initModelManager = () => {
                         <input type="range" id="epochs" min="100" max="1000" step="100" value="500">
                         <span class="value-display">500</span>
                     </div>
-                    <div class="form-group">
-                        <label for="regularization">Regularization</label>
-                        <input type="range" id="regularization" min="0" max="1" step="0.1" value="0.1">
-                        <span class="value-display">0.1</span>
-                    </div>
                 `;
                 break;
             case 'logistic-regression':
@@ -581,11 +595,6 @@ const initModelManager = () => {
                         <input type="range" id="epochs" min="100" max="1000" step="100" value="500">
                         <span class="value-display">500</span>
                     </div>
-                    <div class="form-group">
-                        <label for="regularization">Regularization</label>
-                        <input type="range" id="regularization" min="0" max="1" step="0.1" value="0.1">
-                        <span class="value-display">0.1</span>
-                    </div>
                 `;
                 break;
             case 'knn':
@@ -594,13 +603,6 @@ const initModelManager = () => {
                         <label for="k">Number of Neighbors (k)</label>
                         <input type="range" id="k" min="1" max="20" step="1" value="5">
                         <span class="value-display">5</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="weights">Weights</label>
-                        <select id="weights">
-                            <option value="uniform">Uniform</option>
-                            <option value="distance">Distance</option>
-                        </select>
                     </div>
                 `;
                 break;
@@ -616,13 +618,6 @@ const initModelManager = () => {
                         <input type="range" id="max-iterations" min="100" max="1000" step="100" value="300">
                         <span class="value-display">300</span>
                     </div>
-                    <div class="form-group">
-                        <label for="init">Initialization Method</label>
-                        <select id="init">
-                            <option value="k-means++">k-means++</option>
-                            <option value="random">Random</option>
-                        </select>
-                    </div>
                 `;
                 break;
             case 'decision-tree':
@@ -637,13 +632,6 @@ const initModelManager = () => {
                         <input type="range" id="min-samples-split" min="2" max="20" step="1" value="2">
                         <span class="value-display">2</span>
                     </div>
-                    <div class="form-group">
-                        <label for="criterion">Criterion</label>
-                        <select id="criterion">
-                            <option value="gini">Gini</option>
-                            <option value="entropy">Entropy</option>
-                        </select>
-                    </div>
                 `;
                 break;
             case 'svm':
@@ -653,19 +641,6 @@ const initModelManager = () => {
                         <input type="range" id="c" min="0.1" max="10" step="0.1" value="1">
                         <span class="value-display">1</span>
                     </div>
-                    <div class="form-group">
-                        <label for="kernel">Kernel</label>
-                        <select id="kernel">
-                            <option value="linear">Linear</option>
-                            <option value="rbf">RBF</option>
-                            <option value="poly">Polynomial</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="gamma">Gamma</label>
-                        <input type="range" id="gamma" min="0.001" max="1" step="0.001" value="0.1">
-                        <span class="value-display">0.1</span>
-                    </div>
                 `;
                 break;
         }
@@ -673,7 +648,7 @@ const initModelManager = () => {
         parameterForm.innerHTML = formHTML;
 
         // Add event listeners for value displays
-        parameterForm.querySelectorAll('input[type="range"], select').forEach(input => {
+        parameterForm.querySelectorAll('input[type="range"]').forEach(input => {
             const display = input.nextElementSibling;
             input.addEventListener('input', () => {
                 display.textContent = input.value;
@@ -694,34 +669,20 @@ const initModelManager = () => {
 
             // Get parameters
             const params = {};
-            parameterForm.querySelectorAll('input[type="range"], select').forEach(input => {
+            parameterForm.querySelectorAll('input[type="range"]').forEach(input => {
                 params[input.id] = input.type === 'range' ? parseFloat(input.value) : input.value;
             });
-            console.log("parameters", {params});
-            // Send parameters and model name to the backend
-            const response = await fetch('http://localhost:3000/train', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    algorithm: currentAlgorithm,
-                    parameters: params,
-                }),
-            });
 
-            if (!response.ok) {
-                throw new Error('Failed to train model on the backend');
-            }
+            // Simulate model training (replace with actual API call)
+            await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // Get metrics from the backend response
-            const responseData = await response.json();
-            const { metrics, image } = responseData;
-
-            // Update visualization window with the image
-            if (image) {
-                updateVisualizationWithImage(`data:image/png;base64,${image}`);
-            }
+            // Generate random metrics for demonstration
+            const metrics = {
+                accuracy: (Math.random() * 100).toFixed(2),
+                precision: (Math.random() * 100).toFixed(2),
+                recall: (Math.random() * 100).toFixed(2),
+                f1: (Math.random() * 100).toFixed(2)
+            };
 
             // Add to training history
             const trainingRecord = {
@@ -776,32 +737,53 @@ const initModelManager = () => {
 
     // Update training history display
     const updateTrainingHistory = () => {
-        modelHistory.innerHTML = trainingHistory.map((record, index) => `
+        historyList.innerHTML = trainingHistory.map((record, index) => `
             <div class="history-item">
-                <div class="history-header">
-                    <span class="history-algorithm">${record.algorithm}</span>
-                    <span class="history-timestamp">${new Date(record.timestamp).toLocaleString()}</span>
+                <div class="history-icon ${record.algorithm}">
+                    <i class="fas fa-${getAlgorithmIcon(record.algorithm)}"></i>
                 </div>
-                <div class="history-metrics">
-                    <span class="metric">Accuracy: ${record.metrics.accuracy}%</span>
-                    <span class="metric">F1: ${record.metrics.f1}%</span>
+                <div class="history-details">
+                    <div class="history-name">${formatAlgorithmName(record.algorithm)} Model #${index + 1}</div>
+                    <div class="history-meta">
+                        <span class="history-time">${new Date(record.timestamp).toLocaleString()}</span>
+                        <span class="history-accuracy">Accuracy: ${record.metrics.accuracy}%</span>
+                    </div>
                 </div>
-                <button class="view-details" data-index="${index}">View Details</button>
+                <div class="history-actions">
+                    <button class="action-btn" onclick="showTrainingDetails(${index})">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="action-btn">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
             </div>
         `).join('');
+    };
 
-        // Add event listeners to view details buttons
-        modelHistory.querySelectorAll('.view-details').forEach(button => {
-            button.addEventListener('click', () => {
-                const index = button.dataset.index;
-                const record = trainingHistory[index];
-                showTrainingDetails(record);
-            });
-        });
+    // Helper function to get algorithm icon
+    const getAlgorithmIcon = (algorithm) => {
+        const icons = {
+            'linear-regression': 'chart-line',
+            'logistic-regression': 'wave-square',
+            'knn': 'users',
+            'k-means': 'object-group',
+            'decision-tree': 'project-diagram',
+            'svm': 'border-all'
+        };
+        return icons[algorithm] || 'cogs';
+    };
+
+    // Helper function to format algorithm name
+    const formatAlgorithmName = (algorithm) => {
+        return algorithm.split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
     };
 
     // Show detailed training results
-    const showTrainingDetails = (record) => {
+    const showTrainingDetails = (index) => {
+        const record = trainingHistory[index];
         modelResults.innerHTML = `
             <div class="result-card">
                 <h3>Training Details</h3>

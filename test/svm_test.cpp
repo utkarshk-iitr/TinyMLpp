@@ -54,7 +54,7 @@ int main() {
         // ----------------------------------------------------------------
         // 1) Load dataset
         // ----------------------------------------------------------------
-        string filename = "diabetes.csv";          // expects last column = class label {-1, +1} or {0,1}
+        string filename = "./datasets/diabetes.csv";          // expects last column = class label {-1, +1} or {0,1}
         Data data = readCSV(filename);
         standardize(data);
 
@@ -140,7 +140,7 @@ print(" ".join(map(str, params)))
         // ----------------------------------------------------------------
         // 4) Run Python script & parse
         // ----------------------------------------------------------------
-        string out = exec("./temp_svm.py diabetes.csv");
+        string out = exec("./temp_svm.py ./datasets/diabetes.csv");
         vector<double> pyPreds = parsePythonOutputDouble(out);
 
         // ----------------------------------------------------------------

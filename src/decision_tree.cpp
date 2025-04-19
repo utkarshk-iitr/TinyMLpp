@@ -116,6 +116,8 @@ public:
         }
     
         // Plot nodes
+        gp << "set terminal pngcairo size 800,600 enhanced font 'Arial,10'\n";
+        gp << "set output './imgs/decision_plot.png'\n";
         gp << "set title 'Decision Tree'\n";
         gp << "set size ratio -1\n";
         gp << "set xrange [-1:" << xOffset + 1 << "]\n";

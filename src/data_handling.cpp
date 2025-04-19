@@ -323,4 +323,45 @@ namespace handle
         return static_cast<double>(correct) / true_labels.size();
     }
 
+        // Compute Precision
+        double computePrecision(const vector<double> &true_labels, const vector<double> &predicted_labels) {
+            if (true_labels.size() != predicted_labels.size())
+                throw invalid_argument("Size mismatch between true and predicted labels.");
+    
+            size_t tp = 0, fp = 0;
+            for (size_t i = 0; i < true_labels.size(); ++i) {
+                if (predicted_labels[i] == 1.0) {
+                    if (true_labels[i] == 1.0) ++tp;
+                    else ++fp;
+                }
+            }
+    
+            return (tp + fp == 0) ? 0.0 : static_cast<double>(tp) / (tp + fp);
+        }
+    
+        // Compute Recall
+        double computeRecall(const vector<double> &true_labels, const vector<double> &predicted_labels) {
+            if (true_labels.size() != predicted_labels.size())
+                throw invalid_argument("Size mismatch between true and predicted labels.");
+    
+            size_t tp = 0, fn = 0;
+            for (size_t i = 0; i < true_labels.size(); ++i) {
+                if (true_labels[i] == 1.0) {
+                    if (predicted_labels[i] == 1.0) ++tp;
+                    else ++fn;
+                }
+            }
+    
+            return (tp + fn == 0) ? 0.0 : static_cast<double>(tp) / (tp + fn);
+        }
+    
+        // Compute F1 Score
+        double computeF1Score(const vector<double> &true_labels, const vector<double> &predicted_labels) {
+            double precision = computePrecision(true_labels, predicted_labels);
+            double recall = computeRecall(true_labels, predicted_labels);
+    
+            return (precision + recall == 0.0) ? 0.0 : 2.0 * precision * recall / (precision + recall);
+        }
+    
+
 }

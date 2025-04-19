@@ -60,7 +60,7 @@ int main() {
         // 2. Run C++ k-Means clustering.
         // --------------------------------------------------------------------
         // For example, we use k=3 clusters, maxIterations=100, tol=1e-4.
-        KMeans kmeans(3, 100, 1e-4);
+        KMeans kmeans(3, 100, 1e-7);
         kmeans.train(data); 
         vector<double> cppAssignmentsDouble = kmeans.predict(data);
         vector<int> cppAssignments;

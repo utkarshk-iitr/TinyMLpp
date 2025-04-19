@@ -1,6 +1,6 @@
 {
-  "time_ms": 106.44,
+  "time_ms": 0.880417,
   "memory_kb": 3840,
-  "accuracy": 84.0649,
-  "mse": 259.357
+  "accuracy": 0,
+  "inertia": 260.765
 }

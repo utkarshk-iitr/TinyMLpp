@@ -83,6 +83,7 @@ int main(int argc, char** argv) {
 
         // 2) Load & normalize full dataset
         Data all = readCSV(datasetFile);
+        if(modelName != "k_means_clustering")
         standardize(all);
 
         // 3) Split 80/20, seed=42
@@ -101,14 +102,21 @@ int main(int argc, char** argv) {
         }
         else if (modelName == "svm") {
             model = new SVM(C, lr, epochs);
+            for (auto &lbl : testD.target) {
+                double y = toDouble(lbl);
+                lbl = (y == 0.0 ? "-1" : "1");
+            }
+            for (auto &lbl : trainD.target) {
+                double y = toDouble(lbl);
+                lbl = (y == 0.0 ? "-1" : "1");
+            }
         }
         else if (modelName == "k_means_clustering") {
-            model = new KMeans(lr, epochs); // lr is not used in KMeans
+            model = new KMeans(k, epochs, 1e-4); // lr is not used in KMeans
         }
         else {
             throw runtime_error("Unknown model: " + modelName);
         }
-
 
 
         // Train on training split
@@ -127,9 +135,13 @@ int main(int argc, char** argv) {
 
         // 6) Compute accuracy or R^2
         double accuracy = 0.0;
-        double llerror = 0.0;
+        // double llerror = 0.0;
         double mse = 0.0;
         double inertia = 0.0;
+        double precision = 0.0;
+        double recall = 0.0;
+        double f1 = 0.0;
+
         if (modelName == "logistic_regression") {
             // Classification accuracy
             vector<double> yTrue;
@@ -138,7 +150,10 @@ int main(int argc, char** argv) {
             vector<double> yPred;
             for (double p : preds) yPred.push_back(p > 0.5 ? 1.0 : 0.0);
             accuracy = computeAccuracy(yTrue, yPred);
-            llerror = computeLogLoss(testD, preds);
+            // llerror = computeLogLoss(testD, preds);
+            precision = computePrecision(yTrue, yPred);
+            recall = computeRecall(yTrue, yPred);
+            f1 = computeF1Score(yTrue, yPred);
         }
         else if (modelName == "linear_regression") {
             // Regression: compute R^2 = 1 - SSE/SST
@@ -158,28 +173,32 @@ int main(int argc, char** argv) {
             vector<double> yTrue;
             for (auto &s : testD.target) yTrue.push_back(toDouble(s));
             accuracy = computeAccuracy(yTrue, preds);
+            precision = computePrecision(yTrue, preds);
+            recall = computeRecall(yTrue, preds);
+            f1 = computeF1Score(yTrue, preds);
         }
         else if (modelName == "svm") {
             // SVM: accuracy is already computed above
             vector<double> yTrue;
             for (auto &s : testD.target) yTrue.push_back(toDouble(s));
             accuracy = computeAccuracy(yTrue, preds);
+            precision = computePrecision(yTrue, preds);
+            recall = computeRecall(yTrue, preds);
+            f1 = computeF1Score(yTrue, preds);
         }
         else if (modelName == "k_means_clustering") {
-            // KMeans: accuracy is not applicable, but we can compute the inertia (sum of squared distances to closest centroid)
-            vector<double> yTrue;
-            for (auto &s : testD.target) yTrue.push_back(toDouble(s));
-            
             vector<int> assignments = static_cast<KMeans*>(model)->getAssignments();
+            const auto& centroids = static_cast<KMeans*>(model)->getCentroids();
+        
             for (size_t i = 0; i < testD.features.size(); ++i) {
+                int cluster = assignments[i];
                 double dist = 0.0;
                 for (size_t j = 0; j < testD.features[i].size(); ++j) {
-                    double diff = toDouble(testD.features[i][j]) - toDouble(testD.features[assignments[i]][j]);
+                    double diff = toDouble(testD.features[i][j]) - centroids[cluster][j];
                     dist += diff * diff;
                 }
                 inertia += dist;
             }
-            // cout << "Inertia: " << inertia << "\n";
         }
         
 
@@ -189,17 +208,14 @@ int main(int argc, char** argv) {
         js << "  \"time_ms\": "   << time_ms    << ",\n";
         js << "  \"memory_kb\": " << peakRSS_kb << ",\n";
         js << "  \"accuracy\": "  << accuracy*100   << ",\n";
-        if (modelName == "logistic_regression") {
-            js << "  \"log_loss\": " << llerror << "\n";
+        if (modelName != "k_means_clustering" && modelName != "linear_regression") {
+            js << "  \"precision\": " << precision*100 << ",\n";
+            js << "  \"recall\": "    << recall*100    << ",\n";
+            js << "  \"f1_score\": "  << f1*100        << "\n";
         }
-        else if (modelName == "linear_regression") {
-            js << "  \"mse\": " << mse << "\n";
-        }
-        else if (modelName == "k_means_clustering") {
+        
+        if (modelName == "k_means_clustering") {
             js << "  \"inertia\": " << inertia << "\n";
-        }
-        else {
-            js << "  \"accuracy\": " << accuracy*100 << "\n";
         }
         js << "}\n";
         js.close();

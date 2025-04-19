@@ -122,6 +122,16 @@ double computeLogLoss(Data &data, vector<double> &theta);
 
 double computeAccuracy(vector<double> &true_labels, vector<double> &predicted_labels);
 
+// Compute Precision
+double computePrecision(const vector<double> &true_labels, const vector<double> &predicted_labels);
+
+// Compute Recall
+double computeRecall(const vector<double> &true_labels, const vector<double> &predicted_labels);
+
+// Compute F1 Score
+double computeF1Score(const vector<double> &true_labels, const vector<double> &predicted_labels);
+
+
 #endif // DATA_HANDLING_H
 }
 

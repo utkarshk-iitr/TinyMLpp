@@ -220,6 +220,10 @@ public:
     vector<int> getAssignments() {
         return assignments;
     }
+    
+    vector<std::vector<double>> getCentroids() {
+        return centroids;
+    }
     /**
      * @brief Plots the clusters using matplotlibcpp.
      * 

@@ -657,7 +657,29 @@ const initModelManager = () => {
     };
 
     // Handle model training
-    trainButton.addEventListener('click', async () => {
+    trainButton.addEventListener('click', async (event) => {
+        event.preventDefault(); // Prevent form submission and page refresh
+        // Helper function to read the uploaded dataset
+        const getUploadedDataset = async () => {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput || fileInput.files.length === 0) {
+                console.error('No dataset file uploaded');
+                return Promise.reject('No dataset file uploaded');
+            }
+            const file = fileInput.files[0];
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    console.log('File successfully read:', file.name);
+                    resolve(reader.result);
+                };
+                reader.onerror = () => {
+                    console.error('Failed to read the file:', file.name);
+                    reject(new Error('Failed to read the file'));
+                };
+                reader.readAsText(file);
+            });
+        };
         if (!currentAlgorithm) {
             showNotification('Please select an algorithm first', 'error');
             return;
@@ -665,24 +687,100 @@ const initModelManager = () => {
 
         try {
             trainButton.disabled = true;
-            trainButton.textContent = 'Training...';
 
-            // Get parameters
+            // Handle file upload
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('fileList');
+            const dropZone = document.getElementById('dropZone');
+
+            // Display uploaded files
+            fileInput.addEventListener('change', () => {
+                fileList.innerHTML = '';
+                Array.from(fileInput.files).forEach(file => {
+                    const listItem = document.createElement('div');
+                    listItem.textContent = file.name;
+                    fileList.appendChild(listItem);
+                });
+            });
+
+            // Drag and drop functionality
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            });
+
+            // Send file during training
+            const getUploadedFile = () => {
+                if (!fileInput.files.length) {
+                    throw new Error('No dataset file uploaded');
+                }
+                return fileInput.files[0];
+            };
+
+            // Include file in training request
+            const datasetFile = getUploadedFile();
             const params = {};
             parameterForm.querySelectorAll('input[type="range"]').forEach(input => {
                 params[input.id] = input.type === 'range' ? parseFloat(input.value) : input.value;
             });
 
-            // Simulate model training (replace with actual API call)
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Fetch the uploaded dataset content
+            const datasetContent = await getUploadedDataset();
+            // Make API call to train the model
+            const requiredParams = {
+                lr: params['learning-rate'] !== undefined ? params['learning-rate'] : 0.01,
+                epochs: params['epochs'] !== undefined ? params['epochs'] : 500,
+                k: params['k'] !== undefined ? params['k'] : 5,
+                C: params['c'] !== undefined ? params['c'] : 1
+            };  
+            if (!currentAlgorithm || !requiredParams || !datasetContent) {
+                console.error('Missing required data for training:', {
+                    currentAlgorithm,
+                    requiredParams,
+                    datasetContent
+                });
+                showNotification('Training failed: Missing required data', 'error');
+                return;
+            }
+            console.log('Training with parameters:', requiredParams);
+            const response = await fetch('http://localhost:3000/train', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    algorithm: currentAlgorithm,
+                    parameters: requiredParams,
+                    dataset: datasetContent
+                })
+            });
 
-            // Generate random metrics for demonstration
-            const metrics = {
-                accuracy: (Math.random() * 100).toFixed(2),
-                precision: (Math.random() * 100).toFixed(2),
-                recall: (Math.random() * 100).toFixed(2),
-                f1: (Math.random() * 100).toFixed(2)
-            };
+            if (!response.ok) {
+                const errorDetails = await response.json();
+                console.error('Training failed:', errorDetails);
+                showNotification(`Training failed: ${errorDetails.message || 'Unknown error'}`, 'error');
+                return;
+            }
+
+            trainButton.textContent = 'Training...';
+
+            if (!response.ok) {
+                throw new Error('Failed to train the model');
+            }
+
+            // Parse the response to get metrics
+            const { metrics } = await response.json();
 
             // Add to training history
             const trainingRecord = {

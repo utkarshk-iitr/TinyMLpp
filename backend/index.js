@@ -4,7 +4,7 @@ const cors = require('cors');
 
 // Initialize the app
 const app = express();
-const PORT = 8000;
+const PORT = 3000;
 
 // Middleware
 app.use(cors());
@@ -15,8 +15,8 @@ app.get('/', (req, res) => {
 	res.send('Welcome to the TinyMLpp backend!');
 });             
 
-app.get('/train', (req, res) => {
-	const { algorithm, parameters } = req.query;
+app.post('/train', (req, res) => {
+	const { algorithm, parameters } = req.body;
 
 	// Check if algorithm is provided
 	if (!algorithm) {
@@ -24,45 +24,54 @@ app.get('/train', (req, res) => {
 	}
 
 	// Validate parameters
-	if (!parameters || typeof parameters !== 'object') {
-		return res.status(400).send('Valid parameters are required.');
+	if (!parameters) {
+		return res.status(400).send('Parameters are required.');
 	}
 
-	// Process the request
-	const { exec } = require('child_process');
-	const command = `./demo --model "${algorithm}" --parameters "${parameters}"`;
+	// Validate dataset
+	const dataset = req.body.dataset;
+	if (!dataset) {
+		return res.status(400).send('Dataset is required.');
+	}
 
-	exec(command, (error, stdout, stderr) => {
-		if (error) {
-			console.error(`Error executing command: ${error.message}`);
-			return res.status(500).send(`Error: ${error.message}`);
-		}
-		if (stderr) {
-			console.error(`Error output: ${stderr}`);
-			return res.status(500).send(`Error: ${stderr}`);
-		}
-		const fs = require('fs');
-		const filePath = './visual.jpg'; // Replace with the actual file path created by the binary
+	// Save the dataset file
+	const fs = require('fs');
+	const path = require('path');
+	const datasetDir = path.join(__dirname, '../datasets');
+	const datasetPath = path.join(datasetDir, 'dataset.csv');
 
-		// Check if the file exists
-		fs.access(filePath, fs.constants.F_OK, (err) => {
-			if (err) {
-				console.error('File not found:', filePath);
-				return res.status(500).send('Output file not found.');
+	// Ensure the datasets directory exists
+	if (!fs.existsSync(datasetDir)) {
+		fs.mkdirSync(datasetDir, { recursive: true });
+	}
+
+	fs.writeFile(datasetPath, dataset, (writeErr) => {
+		if (writeErr) {
+			console.error('Error saving dataset:', writeErr);
+			return res.status(500).send('Error saving dataset.');
+		}
+		
+		// Process the request
+		const { exec } = require('child_process');
+		const formattedParameters = Object.entries(parameters)
+			.map(([key, value]) => `${key}=${value}`)
+			.join(',');
+		const command = `./demo --model "${algorithm}" --parameters "${formattedParameters}" --dataset "${datasetPath}"`;
+		console.log(command);
+		exec(command, (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Error executing command: ${error.message}`);
+				return res.status(500).send(`Error: ${error.message}`);
+			}
+			if (stderr) {
+				console.error(`Error output: ${stderr}`);
+				return res.status(500).send(`Error: ${stderr}`);
 			}
 
-			// Read the file and send it as base64 along with the stdout
-			fs.readFile(filePath, { encoding: 'base64' }, (readErr, data) => {
-				if (readErr) {
-					console.error('Error reading file:', readErr);
-					return res.status(500).send('Error reading output file.');
-				}
-
-				res.setHeader('Content-Type', 'application/json');
-				res.send({
-					message: stdout,
-					file: data // Base64 encoded image
-				});
+			// Send the command output as the response
+			res.status(200).send({
+				message: 'Training completed successfully.',
+				output: stdout.trim()
 			});
 		});
 	});

@@ -5,17 +5,14 @@
 #include <cmath>
 #include <algorithm>
 #include <stdexcept>
-
+#include <gnuplot-iostream.h>
 #include "base.h"
 #include "data_handling.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#include "../include/matplotlibcpp.h"
 #pragma GCC diagnostic pop
-
 using namespace handle;
-namespace plt = matplotlibcpp;
 
 class SVM : public Model {
     private:
@@ -90,53 +87,72 @@ class SVM : public Model {
 
     // 2D plot (only works if features.size()==2)
     void plotSVM(Data &data, const vector<double>& params) {
+        // Uncomment this to enforce 2D feature check
         // if (data.features.empty() || data.features[0].size() != 2)
         //     throw runtime_error("plotSVM requires exactly 2 features");
-
+    
         // extract bias & weights
         double b = params[0];
         double w0 = params[1];
         double w1 = params[2];
-
+    
         // split points by true label
-        vector<double> x_pos, y_pos, x_neg, y_neg;
+        vector<pair<double, double>> pos_points, neg_points;
+        vector<double> y_vals, x_vals;
         for (size_t i = 0; i < data.features.size(); ++i) {
-            double x = toDouble(data.features[i][0]);
-            double y = toDouble(data.features[i][1]);
-            double lab = toDouble(data.target[i]);
-            if (lab > 0) {
-                x_pos.push_back(x);
-                y_pos.push_back(y);
-            } else {
-                x_neg.push_back(x);
-                y_neg.push_back(y);
-            }
+            double x = stod(data.features[i][0]);
+            double y = stod(data.features[i][1]);
+            double lab = stod(data.target[i]);
+            if (lab > 0)
+                pos_points.emplace_back(x, y);
+            else
+                neg_points.emplace_back(x, y);
+            y_vals.push_back(y);
+            x_vals.push_back(x);
         }
-
-        // decision boundary line: w0*x + w1*y + b = 0  ⇒  y = -(w0/w1)x - b/w1
-        double x_min = *min_element(x_pos.begin(), x_pos.end());
-        x_min = min(x_min, *min_element(x_neg.begin(), x_neg.end()));
-        double x_max = *max_element(x_pos.begin(), x_pos.end());
-        x_max = max(x_max, *max_element(x_neg.begin(), x_neg.end()));
-
+    
+        // find min and max x values
+        double x_min = numeric_limits<double>::max();
+        double x_max = numeric_limits<double>::lowest();
+    
+        for (const auto& pt : pos_points) {
+            x_min = min(x_min, pt.first);
+            x_max = max(x_max, pt.first);
+        }
+        for (const auto& pt : neg_points) {
+            x_min = min(x_min, pt.first);
+            x_max = max(x_max, pt.first);
+        }
+    
+        // decision boundary line: y = -(w0/w1)x - b/w1
+        vector<pair<double, double>> boundary;
         const int num = 100;
-        vector<double> xb(num), yb(num);
         double step = (x_max - x_min) / (num - 1);
         for (int i = 0; i < num; ++i) {
-            xb[i] = x_min + i * step;
-            yb[i] = -(w0 / w1) * xb[i] - b / w1;
+            double x = x_min + i * step;
+            double y = -(w0 / w1) * x - b / w1;
+            boundary.emplace_back(x, y);
         }
-
-        plt::figure_size(800, 600);
-        plt::scatter(x_pos, y_pos, 30.0, {{"color", "blue"}, {"label", "+1"}});
-        plt::scatter(x_neg, y_neg, 30.0, {{"color", "red"},   {"label", "-1"}});
-        plt::plot(xb, yb, {{"color", "black"}, {"label", "Decision Boundary"}});
-        plt::xlabel("Feature 0");
-        plt::ylabel("Feature 1");
-        plt::title("Linear SVM Classification");
-        plt::legend();
-        plt::grid(true);
-        plt::show();
+    
+        // plot using gnuplot-iostream
+        Gnuplot gp;
+        double y_min = *min_element(y_vals.begin(), y_vals.end())*2;
+        double y_max = *max_element(y_vals.begin(), y_vals.end())*2;
+    
+        gp << "set title 'Linear SVM Classification'\n";
+        gp << "set xlabel 'Feature 0'\n";
+        gp << "set ylabel 'Feature 1'\n";
+        gp << "set grid\n";
+        gp << "set key top right opaque box font ',8'\n";
+        gp << "set yrange [" << y_min << ":" << y_max << "]\n";
+        // gp << "set style fill solid 1.0\n";
+        gp << "plot '-' with points pointtype 7 pointsize 1 lc rgb 'blue' title '+1', "
+              "'-' with points pointtype 7 pointsize 1 lc rgb 'red' title '-1', "
+              "'-' with lines lc rgb 'black' title 'Decision Boundary'\n";
+    
+        gp.send1d(pos_points);
+        gp.send1d(neg_points);
+        gp.send1d(boundary);
     }
 };
 

@@ -61,21 +61,54 @@ app.post('/train', (req, res) => {
 		exec(command, (error, stdout, stderr) => {
 			if (error) {
 				console.error(`Error executing command: ${error.message}`);
-				return res.status(500).send(`Error: ${error.message}`);
+				return res.status(500).send({ error: error.message });
 			}
 			if (stderr) {
 				console.error(`Error output: ${stderr}`);
-				return res.status(500).send(`Error: ${stderr}`);
+				return res.status(500).send({ error: stderr });
 			}
 			console.log(`Command output: ${stdout}`);
-			// Send the command output as the response
-			res.status(200).send({
-				message: 'Training completed successfully.',
-				output: stdout.trim()
-			});
+
+			// Read and process the metrics.json file
+			readMetricsFile(path.join(__dirname, './metrics.json'), res, req);
 		});
 	});
 });
+
+// Function to read and process the metrics.json file
+function readMetricsFile(metricsPath, res, req) {
+	const fs = require('fs');
+
+	fs.readFile(metricsPath, 'utf8', (readErr, data) => {
+		if (readErr) {
+			console.error('Error reading metrics file:', readErr);
+			return res.status(500).send({ error: 'Error reading metrics file.' });
+		}
+
+		// Parse the metrics.json file
+		let metrics;
+		try {
+			metrics = JSON.parse(data);
+		} catch (parseErr) {
+			console.error('Error parsing metrics file:', parseErr);
+			return res.status(500).send({ error: 'Error parsing metrics file.' });
+		}
+
+		// Construct the response object with formatted values
+		const response = {
+			metrics: {
+				accuracy: `${(metrics.accuracy || 0).toFixed(2)}%`,
+				precision: `${(metrics.precision || 0).toFixed(2)}%`,
+				recall: `${(metrics.recall || 0).toFixed(2)}%`,
+				f1: `${(metrics.f1_score || 0).toFixed(2)}%`,
+			},
+			parameters: req.body.parameters || {},
+		};
+		console.log('Response:', response);
+		// Send the response as JSON
+		res.json(response);
+	});
+}
 
 // Start the server             
 app.listen(PORT, () => {    

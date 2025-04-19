@@ -765,7 +765,7 @@ const initModelManager = () => {
                     dataset: datasetContent
                 })
             });
-
+            console.log('Response from server:', response);
             if (!response.ok) {
                 const errorDetails = await response.json();
                 console.error('Training failed:', errorDetails);
@@ -781,7 +781,12 @@ const initModelManager = () => {
 
             // Parse the response to get metrics
             const { metrics } = await response.json();
-
+            // Parse metrics values to numbers
+            metrics.accuracy = parseFloat(metrics.accuracy.replace('%', ''));
+            metrics.precision = parseFloat(metrics.precision.replace('%', ''));
+            metrics.recall = parseFloat(metrics.recall.replace('%', ''));
+            metrics.f1 = parseFloat(metrics.f1.replace('%', ''));
+            console.log('Training metrics:', metrics);
             // Add to training history
             const trainingRecord = {
                 algorithm: currentAlgorithm,
@@ -819,14 +824,13 @@ const initModelManager = () => {
                     </div>
                 </div>
             `;
-
             // Update history
             updateTrainingHistory();
 
-            showNotification('Model trained successfully', 'success');
+            // showNotification('Model trained successfully', 'success');
         } catch (error) {
             console.error('Error training model:', error);
-            showNotification('Error training model', 'error');
+            // showNotification('Error training model', 'error');
         } finally {
             trainButton.disabled = false;
             trainButton.textContent = 'Train Model';

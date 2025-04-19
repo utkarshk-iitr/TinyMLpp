@@ -12,10 +12,6 @@
 #include "data_handling.h"
 #include <gnuplot-iostream.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-// #include "../include/matplotlibcpp.h"  // or the relevant parts that trigger the warnings
-#pragma GCC diagnostic pop
 
 
 using namespace std;

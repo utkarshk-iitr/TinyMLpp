@@ -115,27 +115,34 @@ public:
         vector<pair<double, double>> boundary;
         double x_min = *min_element(x_vals.begin(), x_vals.end()); // or use actual min/max from data
         double x_max = *max_element(x_vals.begin(), x_vals.end());
-        x_max *= 1.3; 
-        x_min *= 1.3;
-
-        for (double x1 = x_min; x1 <= x_max; x1 += 0.1) {
-            double x2 = -(theta[0] + theta[1]*x1) / theta[2];
-            boundary.emplace_back(x1, x2);
-        }
-
+        x_max *= 1.5; 
+        x_min *= 1.5;
         double y_min = *min_element(y_vals.begin(), y_vals.end());
         double y_max = *max_element(y_vals.begin(), y_vals.end());
         y_max *= 1.3; 
         y_min *= 1.3;
-        
+
+        if (abs(theta[2]) < 1e-5) {
+            double x_const = -theta[0] / theta[1];
+            for (double y = y_min; y <= y_max; y += 0.1) {
+                boundary.emplace_back(x_const, y);
+            }
+        }
+        else{
+            for (double x1 = x_min; x1 <= x_max; x1 += 0.1) {
+                double x2 = -(theta[0] + theta[1]*x1) / theta[2];
+                boundary.emplace_back(x1, x2);
+            }
+        }
+        // cout<<theta[2]<<endl;
 
         gp << "set title 'Logistic Regression'\n";
         gp << "set xlabel 'x1'\n";
         gp << "set ylabel 'x2'\n";
-        gp << "set grid\n";
+        // gp << "set grid\n";
         gp << "set key top right opaque box font ',8'\n";
-        gp << "set yrange [" << y_min << ":" << y_max << "]\n";
-        gp << "set xrange [" << x_min << ":" << x_max << "]\n";
+        gp << "set yrange [" << -5+y_min << ":" << 5+y_max << "]\n";
+        // gp << "set xrange [" << -5+x_min << ":" << 5+x_max << "]\n";
         gp << "plot '-' with points pointtype 7 lc rgb 'red' title 'Class 0', "
             "'-' with points pointtype 7 lc rgb 'blue' title 'Class 1', "
             "'-' with lines lt rgb 'black' lw 2 title 'Decision Boundary'\n";

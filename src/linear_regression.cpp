@@ -6,6 +6,7 @@
 #include <cfloat>
 #include <cmath>
 #include "data_handling.h"    // for readCSV, toDouble, computeMeanSquaredError, train_test_split, etc.
+#include "base.h"           // for Model
 #include <gnuplot-iostream.h>
 
 using namespace std;
@@ -20,16 +21,13 @@ static constexpr double DEFAULT_TEST_SIZE = 0.2;
 static constexpr unsigned DEFAULT_SEED   = 42;
 
 // LinearRegression class definition (methods)
-class LinearRegression {
-public:
-    double learningRate;
-    int epochs;
+class LinearRegression : public Model {
 private:
     vector<double> theta;
 
 public:
     LinearRegression(double lr = 0.01, int ep = 1000)
-      : learningRate(lr), epochs(ep) {}
+      : Model(lr, ep) {}
 
     // Splits data, trains on data, reports on both splits
     void* train(Data &data) {

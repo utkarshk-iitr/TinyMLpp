@@ -83,9 +83,9 @@ int main(int argc, char** argv) {
 
         // 2) Load & normalize full dataset
         Data all = readCSV(datasetFile);
+        displayDataFrame(all);
         if(modelName != "k_means_clustering")
         standardize(all);
-
         // 3) Split 80/20, seed=42
         auto [trainD, testD] = train_test_split(all, 0.2, 42);
 
@@ -120,7 +120,12 @@ int main(int argc, char** argv) {
 
 
         // Train on training split
-        void* rawTheta = model->train(trainD);
+        void* rawTheta;
+        
+        if(modelName !="k_means_clustering")
+        rawTheta = model->train(trainD);
+        else
+        rawTheta = model->train(all);
 
         // Predict on test split
         vector<double> preds = model->predict(testD);

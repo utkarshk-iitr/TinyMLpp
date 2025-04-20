@@ -89,22 +89,32 @@ function readMetricsFile(metricsPath, res, req) {
 		let metrics;
 		try {
 			metrics = JSON.parse(data);
+			console.log('Original metrics from file:', metrics);
 		} catch (parseErr) {
 			console.error('Error parsing metrics file:', parseErr);
 			return res.status(500).send({ error: 'Error parsing metrics file.' });
 		}
 
-		// Construct the response object with formatted values
+		// Construct the response object
 		const response = {
-			metrics: {
-				accuracy: `${(metrics.accuracy || 0).toFixed(2)}%`,
-				precision: `${(metrics.precision || 0).toFixed(2)}%`,
-				recall: `${(metrics.recall || 0).toFixed(2)}%`,
-				f1: `${(metrics.f1_score || 0).toFixed(2)}%`,
-			},
+			metrics: {},
 			parameters: req.body.parameters || {},
 		};
-		console.log('Response:', response);
+
+		// Copy all metrics from the file to the response exactly as they appear
+		// Format numeric values as percentages if appropriate, but maintain original keys
+		for (const [key, value] of Object.entries(metrics)) {
+			// These fields should be kept as is (not formatted as percentages)
+			const nonPercentageFields = ['time_ms', 'memory_kb', 'inertia'];
+			if (nonPercentageFields.includes(key)) {
+				response.metrics[key] = value;
+			} else {
+				// Format as percentage for metrics like accuracy, precision, recall, f1_score, r2
+				response.metrics[key] = `${value.toFixed(2)}%`;
+			}
+		}
+
+		console.log('Response metrics:', response.metrics);
 		// Send the response as JSON
 		res.json(response);
 	});

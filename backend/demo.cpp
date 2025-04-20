@@ -16,6 +16,7 @@
 #include "../src/knn.cpp"               // KNN
 #include "../src/svm.cpp"               // SVM
 #include "../src/k_means_clustering.cpp" // KMeans
+// #include "../src/decision_tree.cpp"     // DecisionTree
 
 
 using namespace std;
@@ -146,6 +147,7 @@ int main(int argc, char** argv) {
         double precision = 0.0;
         double recall = 0.0;
         double f1 = 0.0;
+        double r2 = 0.0;
 
         if (modelName == "logistic_regression") {
             // Classification accuracy
@@ -170,7 +172,7 @@ int main(int argc, char** argv) {
                 ssTot += (yTrue[i] - meanY)*(yTrue[i] - meanY);
                 ssRes += (yTrue[i] - preds[i])*(yTrue[i] - preds[i]);
             }
-            accuracy = 1.0 - ssRes/ssTot;
+            r2 = 1.0 - ssRes/ssTot;
             mse = computeMeanSquaredError(testD, preds);
         }
         else if (modelName == "knn") {
@@ -217,7 +219,8 @@ int main(int argc, char** argv) {
             js << "  \"inertia\": " << inertia << "\n";
         } 
         else if (modelName == "linear_regression") {
-            js << "  \"accuracy\": "  << accuracy*100   << "\n";
+            js << "  \"r2\": "  << r2*100   << ",\n";
+            js << "  \"mse\": "  << mse   << "\n";
             // js << "  \"mse\": "       << mse            << "\n";
         } 
         else {

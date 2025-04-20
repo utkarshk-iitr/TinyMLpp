@@ -56,7 +56,7 @@ int main() {
 
         // 2. Train C++ DecisionTree.
         DecisionTree dt(/*maxDepth=*/5, /*minSamplesSplit=*/2);
-        DecisionTree::Node* root = static_cast<DecisionTree::Node*>(dt.train(data));
+        dt.train(data);
         
         vector<double> cppPreds = dt.predict(data);
 
@@ -100,7 +100,9 @@ if __name__ == '__main__':
         }
 
         // 6. Plot the tree
-        dt.plotTree(root);
+        dt.plotTree();
+        dt.plot();
+        
 
         // 7. Cleanup.
         remove("temp_dectree.py");

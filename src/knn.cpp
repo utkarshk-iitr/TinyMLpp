@@ -153,8 +153,8 @@ public:
         double y_max = *max_element(y_vals.begin(), y_vals.end());
         y_max *= 1.2;
         // Setup the plot
-        gp << "set terminal pngcairo size 800,600 enhanced font 'Arial,10'\n";
-        gp << "set output './imgs/knn_plot.png'\n";
+        // gp << "set terminal pngcairo size 800,600 enhanced font 'Arial,10'\n";
+        // gp << "set output './imgs/knn_plot.png'\n";
         gp << "set title 'KNN Classification Results'\n";
         gp << "set xlabel 'Feature 1'\n";
         gp << "set ylabel 'Feature 2'\n";

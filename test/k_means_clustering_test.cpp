@@ -53,7 +53,7 @@ int main() {
         // --------------------------------------------------------------------
         // 1. Load dataset from "exported_dataset.csv" using our C++ data handler.
         // --------------------------------------------------------------------
-        std::string filename = "iris_data_without_labels.csv";
+        std::string filename = "./datasets/iris_data_without_labels.csv";
         handle::Data data = handle::readCSV(filename);
 
         // --------------------------------------------------------------------

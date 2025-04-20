@@ -336,97 +336,88 @@ public:
      * Computes node positions using an in-order traversal and plots nodes (with labels inside boxes)
      * and edges (as arrows) to represent the tree structure.
      */
-    void plotDecisionBoundary(handle::Data &data, double step = 0.05) {
-        // Ensure that the decision tree is trained.
-        if (!root) {
-            throw runtime_error("Decision tree is empty! Train the model before plotting the decision boundary.");
+    void plot(handle::Data &data, double step = 0.05) {
+        if (!root) 
+            throw runtime_error("Decision tree is empty! Train before plotting.");
+        if (data.features.empty() || data.features[0].size() < 2)
+            throw runtime_error("Need at least two features for 2D plotting.");
+    
+        // 1) compute bounds + padding
+        double xmin = DBL_MAX, xmax = -DBL_MAX;
+        double ymin = DBL_MAX, ymax = -DBL_MAX;
+        for (auto &row : data.features) {
+            double x = handle::toDouble(row[0]);
+            double y = handle::toDouble(row[1]);
+            xmin = min(xmin, x); xmax = max(xmax, x);
+            ymin = min(ymin, y); ymax = max(ymax, y);
         }
-        // Ensure the data has at least two features.
-        if (data.features.empty() || data.features[0].size() < 2) {
-            throw runtime_error("Data must have at least two features for 2D decision boundary plotting.");
-        }
-
-        // Compute boundaries (xmin, xmax, ymin, ymax) from the data.
-        double xmin = numeric_limits<double>::max(), xmax = numeric_limits<double>::lowest();
-        double ymin = numeric_limits<double>::max(), ymax = numeric_limits<double>::lowest();
-        for (size_t i = 0; i < data.features.size(); ++i) {
-            double x = handle::toDouble(data.features[i][0]);
-            double y = handle::toDouble(data.features[i][1]);
-            if (x < xmin) xmin = x;
-            if (x > xmax) xmax = x;
-            if (y < ymin) ymin = y;
-            if (y > ymax) ymax = y;
-        }
-        // Add some padding to the ranges.
-        double x_pad = (xmax - xmin) * 0.1;
-        double y_pad = (ymax - ymin) * 0.1;
-        xmin -= x_pad; xmax += x_pad;
-        ymin -= y_pad; ymax += y_pad;
-
-        // Determine the grid size.
+        double xpad = (xmax - xmin) * 0.1, ypad = (ymax - ymin) * 0.1;
+        xmin -= xpad; xmax += xpad;
+        ymin -= ypad; ymax += ypad;
+    
+        // 2) build grid of predictions
         int nX = static_cast<int>((xmax - xmin) / step) + 1;
         int nY = static_cast<int>((ymax - ymin) / step) + 1;
-
-        // Create a 2D grid (matrix) of predicted labels.
-        vector<vector<int>> grid(nY, vector<int>(nX, 0));
-        for (int i = 0; i < nY; i++) {
-            double y_val = ymin + i * step;
-            for (int j = 0; j < nX; j++) {
-                double x_val = xmin + j * step;
-                // Form a 2D point for prediction.
-                vector<double> pt = {x_val, y_val};
-                // Predict the class using the decision tree.
-                int pred = traverseTree(root, pt);
-                grid[i][j] = pred;
+        vector<vector<int>> grid(nY, vector<int>(nX));
+        for (int i = 0; i < nY; ++i) {
+            double yv = ymin + i * step;
+            for (int j = 0; j < nX; ++j) {
+                double xv = xmin + j * step;
+                grid[i][j] = traverseTree(root, {xv, yv});
             }
         }
-
-        // Set up Gnuplot.
+    
+        // 3) plot
         Gnuplot gp;
         gp << "set title 'Decision Boundary'\n";
         gp << "unset key\n";
         gp << "set xrange [" << xmin << ":" << xmax << "]\n";
         gp << "set yrange [" << ymin << ":" << ymax << "]\n";
-        // Activate pm3d map for a color image effect.
-        gp << "set pm3d map\n";
-        gp << "set palette defined ( 0 'blue', 1 'red' )\n";
-        gp << "splot '-' matrix with image\n";
-
-        // Send the grid matrix in row-major order.
-        // Each line corresponds to one row of the grid.
-        for (int i = 0; i < nY; i++) {
-            for (int j = 0; j < nX; j++) {
+    
+        // <-- pastel-blue for class 0 region, pastel-red for class 1 region -->
+        gp << "set palette defined ( 0 'yellow', 1 'red' )\n";
+    
+        // We’ll send 3 datasets:
+        //   1) the grid-region,
+        //   2) the class 0 points in royal‑blue,
+        //   3) the class 1 points in crimson.
+        gp << "plot "
+              "'-' matrix with image notitle, "
+              "'-' using 1:2 with points pt 7 ps 1 lc rgb 'blue' title 'Class 0', "
+              "'-' using 1:2 with points pt 7 ps 1 lc rgb 'green'  title 'Class 1'\n";
+    
+        // 3a) send grid
+        for (int i = 0; i < nY; ++i) {
+            for (int j = 0; j < nX; ++j) {
                 gp << grid[i][j] << " ";
             }
             gp << "\n";
         }
         gp << "e\n";
-
-        cout << "Press Enter to continue...";
-        cin.get();
-    }
-
-    /**
-     * @brief (Optional) Utility function to print the decision tree.
-     * 
-     * Can be used for debugging and visualizing the tree structure.
-     */
-    void printTree(Node* node, string indent = "") {
-        if (!node) return;
-        if (node->isLeaf) {
-            cout << indent << "Leaf [Prediction: " << node->prediction << "]\n";
-        } else {
-            cout << indent << "Node [Feature " << node->featureIndex << " < " << node->threshold << "]\n";
-            cout << indent << "Left:\n";
-            printTree(node->left, indent + "  ");
-            cout << indent << "Right:\n";
-            printTree(node->right, indent + "  ");
+    
+        // 3b) send class 0 points
+        for (size_t i = 0; i < data.features.size(); ++i) {
+            int cls = static_cast<int>(handle::toDouble(data.target[i]));
+            if (cls == 0) {
+                double x = handle::toDouble(data.features[i][0]);
+                double y = handle::toDouble(data.features[i][1]);
+                gp << x << " " << y << "\n";
+            }
         }
+        gp << "e\n";
+    
+        // 3c) send class 1 points
+        for (size_t i = 0; i < data.features.size(); ++i) {
+            int cls = static_cast<int>(handle::toDouble(data.target[i]));
+            if (cls == 1) {
+                double x = handle::toDouble(data.features[i][0]);
+                double y = handle::toDouble(data.features[i][1]);
+                gp << x << " " << y << "\n";
+            }
+        }
+        gp << "e\n";
     }
-
-    /**
-     * @brief Destructor to clean up the tree.
-     */
+    
     ~DecisionTree() {
         freeTree(root);
     }

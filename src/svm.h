@@ -5,17 +5,17 @@
 #include <cmath>
 #include <algorithm>
 #include <stdexcept>
-
+#include <gnuplot-iostream.h>
 #include "base.h"
 #include "data_handling.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#include "../include/matplotlibcpp.h"
+// #include "../include/matplotlibcpp.h"
 #pragma GCC diagnostic pop
 
 using namespace handle;
-namespace plt = matplotlibcpp;
+// namespace plt = matplotlibcpp;
 
 class SVM : public Model {
     private:

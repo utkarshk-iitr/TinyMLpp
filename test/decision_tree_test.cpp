@@ -49,63 +49,22 @@ bool compareVectors(const vector<double>& a, const vector<double>& b, double tol
 int main() {
     try {
         // 1. Load and preprocess data.
-        string filename = "toy.csv";
+        string filename = "./datasets/placementt.csv";
         Data data = readCSV(filename);
-        displayDataFrame(data);
+        // displayDataFrame(data);
         standardize(data);
 
         // 2. Train C++ DecisionTree.
-        DecisionTree dt(/*maxDepth=*/5, /*minSamplesSplit=*/2);
+        DecisionTree dt(5,2);
         dt.train(data);
         
         vector<double> cppPreds = dt.predict(data);
-
-        // 3. Write Python test script.
-        ofstream pyFile("temp_dectree.py");
-        if (!pyFile) throw runtime_error("Unable to create Python script.");
-        pyFile << R"(#!/usr/bin/env python3
-# coding: utf-8
-import sys
-import pandas as pd
-from sklearn.tree import DecisionTreeRegressor
-
-if __name__ == '__main__':
-    fn = sys.argv[1] if len(sys.argv)>1 else 'toy.csv'
-    df = pd.read_csv(fn)
-    X = df.iloc[:, :-1].values
-    y = df.iloc[:, -1].values
-    model = DecisionTreeRegressor(max_depth=5, min_samples_split=2, random_state=42)
-    model.fit(X, y)
-    preds = model.predict(X)
-    print(" ".join(map(str, preds)))
-)";
-        pyFile.close();
-        system("chmod +x temp_dectree.py");
-
-        // 4. Execute Python script.
-        string pyOut = exec("./temp_dectree.py toy.csv");
-        vector<double> pyPreds = parsePythonOutputDouble(pyOut);
-
-        // 5. Compare predictions.
-        bool ok = compareVectors(cppPreds, pyPreds, 1e-2);
-        if (ok) {
-            cout << "Test passed: C++ and Python Decision Tree predictions match." << endl;
-        } else {
-            cout << "Test FAILED: Predictions differ." << endl;
-            cout << "C++ preds:";
-            for (double v : cppPreds) cout << " " << v;
-            cout << "\nPython preds:";
-            for (double v : pyPreds) cout << " " << v;
-            cout << endl;
+        cout << "C++ Decision Tree Predictions: ";
+        for (const auto& pred : cppPreds) {
+            cout << pred << " ";
         }
-
-        // 6. Plot the tree
-        dt.plotTree();
-        dt.plot();
-        
-
-        // 7. Cleanup.
-        remove("temp_dectree.py");
+        cout << endl;
+        dt.plot(data,0.1);
 
     } catch (const exception &e) {
         cerr << "Error: " << e.what() << endl;

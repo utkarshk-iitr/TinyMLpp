@@ -90,6 +90,16 @@ public:
         return predictions;
     }
 
+    int predictSingle(const vector<string>& features) {
+        double z = theta[0]; // Intercept
+        for (size_t i = 0; i < features.size(); i++) {
+            double xj = toDouble(features[i]);
+            z += theta[i + 1] * xj;
+        }
+        double probability = sigmoid(z);
+        return (probability >= 0.5) ? 1 : 0;
+    }
+    
     void plotLR(Data& data,vector<double>& theta) {
         Gnuplot gp;
 

@@ -115,6 +115,20 @@ public:
         return out;
     }
     
+    double predictsingle(const vector<string> &features) {
+        size_t n = features.size();
+        if (theta.size() != n + 1) {
+            throw runtime_error("Model not trained or feature size mismatch");
+        }
+    
+        double yhat = theta[0]; // bias term
+        for (size_t i = 0; i < n; ++i) {
+            yhat += theta[i + 1] * toDouble(features[i]);
+        }
+        return yhat;
+    }
+    
+
     void plotLinearRegression(Data &data, vector<double>& theta) {
         Gnuplot gp;
         

@@ -80,6 +80,10 @@
     "ios": "cpp",
     "locale": "cpp",
     "queue": "cpp",
-    "list": "cpp"
+    "list": "cpp",
+    "coroutine": "cpp",
+    "set": "cpp",
+    "future": "cpp",
+    "cfenv": "cpp"
   }
 }

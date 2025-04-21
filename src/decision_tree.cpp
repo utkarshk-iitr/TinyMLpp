@@ -118,7 +118,7 @@ private:
     }
 
     // Recursively builds the decision tree.
-    Node* buildTree(const vector<vector<double>>& X, const vector<int>& y, const vector<int>& indices, int depth) {
+    Node* buildTree(vector<vector<double>>& X, vector<int>& y, vector<int>& indices, int depth) {
         Node* node = new Node();
 
         // Determine the majority class for this node.
@@ -173,7 +173,7 @@ private:
     }
 
     // Helper for prediction: Traverse the tree for a single data point.
-    int traverseTree(Node* node, const vector<double>& x) {
+    int traverseTree(Node* node, vector<double>& x) {
         if (node->isLeaf) {
             return node->prediction;
         }
@@ -363,7 +363,8 @@ public:
             double yv = ymin + i * step;
             for (int j = 0; j < nX; ++j) {
                 double xv = xmin + j * step;
-                grid[i][j] = traverseTree(root, {xv, yv});
+                vector<double> point = {xv, yv};
+                grid[i][j] = traverseTree(root, point);
             }
         }
     

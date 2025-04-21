@@ -90,7 +90,7 @@ public:
         return predictions;
     }
 
-    int predictSingle(const vector<string>& features) {
+    int predictSingle(vector<string>& features) {
         double z = theta[0]; // Intercept
         for (size_t i = 0; i < features.size(); i++) {
             double xj = toDouble(features[i]);

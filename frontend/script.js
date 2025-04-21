@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initFileUpload();
     initNotifications();
     initTrainingWorkflow();
+    initPredictionFeatures();
 });
 
 // Theme toggle functionality
@@ -492,10 +493,11 @@ function simulateTraining() {
 // Simulate prediction
 function simulatePrediction() {
     const predictionResult = document.getElementById('prediction-result');
-    const confidenceFill = document.querySelector('.confidence-fill');
-    const confidenceValue = document.querySelector('.confidence-value');
+    const confidenceFill = document.getElementById('confidence-fill');
+    const confidenceValue = document.getElementById('confidence-value');
+    const predictionValue = document.getElementById('prediction-value');
     
-    if (!predictionResult || !confidenceFill || !confidenceValue) return;
+    if (!predictionResult || !confidenceFill || !confidenceValue || !predictionValue) return;
     
     // Add loading class to predict button
     const predictBtn = document.getElementById('predict-btn');
@@ -504,18 +506,83 @@ function simulatePrediction() {
         predictBtn.innerHTML = '<div class="loading-spinner"></div> Predicting...';
     }
     
-    // Reset confidence
-    confidenceFill.style.width = '0%';
+    // Collect feature values from inputs
+    const featureInputs = document.querySelectorAll('#prediction-inputs .input-field input');
+    const features = {};
+    let missingValues = false;
     
-    // Simulate loading
+    featureInputs.forEach(input => {
+        const featureName = input.getAttribute('data-feature');
+        const featureType = input.getAttribute('data-type');
+        const value = input.value.trim();
+        
+        if (!value) {
+            missingValues = true;
+            input.classList.add('error');
+            setTimeout(() => input.classList.remove('error'), 2000);
+            return;
+        }
+        
+        // Convert to appropriate type
+        if (featureType === 'numeric') {
+            features[featureName] = parseFloat(value);
+        } else {
+            features[featureName] = value;
+        }
+    });
+    
+    if (missingValues) {
+        if (predictBtn) {
+            predictBtn.disabled = false;
+            predictBtn.innerHTML = '<i class="fas fa-magic"></i> Predict';
+        }
+        showNotification('Please fill in all feature values', 'warning');
+        return;
+    }
+    
+    console.log('Prediction features:', features);
+    
+    // Show prediction result container
+    predictionResult.style.display = 'block';
+    
+    // In a real implementation, this would call the API with the features
+    // For demonstration, simulate a response
+    
+    // Simulate API call
     setTimeout(() => {
-        // Update result
-        document.querySelector('.result-value').textContent = 'Class A';
+        // Update result based on current algorithm
+        const activeAlgorithm = document.querySelector('.algorithm-card.active');
+        let predictionOutput = '--';
+        let confidence = 0;
+        
+        if (activeAlgorithm) {
+            const algorithm = activeAlgorithm.getAttribute('data-algorithm');
+            
+            if (algorithm === 'linear-regression') {
+                // Regression result - numeric output
+                predictionOutput = (Math.random() * 100).toFixed(2);
+                confidence = 85 + Math.random() * 10;
+            } else if (algorithm === 'logistic-regression' || algorithm === 'svm' || algorithm === 'decision-tree' || algorithm === 'knn') {
+                // Classification result - categorical output
+                const classes = ['Class A', 'Class B', 'Class C'];
+                predictionOutput = classes[Math.floor(Math.random() * classes.length)];
+                confidence = 75 + Math.random() * 20;
+            } else if (algorithm === 'k_means_clustering') {
+                // Clustering result - cluster number
+                const cluster = Math.floor(Math.random() * 5) + 1;
+                predictionOutput = `Cluster ${cluster}`;
+                confidence = 80 + Math.random() * 15;
+            }
+        }
+        
+        // Update the prediction value
+        predictionValue.textContent = predictionOutput;
         
         // Animate confidence bar
+        confidenceFill.style.width = '0%';
         setTimeout(() => {
-            confidenceFill.style.width = '85%';
-            confidenceValue.textContent = '85%';
+            confidenceFill.style.width = `${confidence}%`;
+            confidenceValue.textContent = `${Math.round(confidence)}%`;
         }, 300);
         
         if (predictBtn) {
@@ -1019,6 +1086,9 @@ function initTrainingWorkflow() {
         
         // Set the full HTML
         container.innerHTML = header + metricsHTML + footer;
+        
+        // Update prediction features
+        updatePredictionFeatures(algorithm, metrics, currentDatasetInfo);
     }
     
     // Format algorithm name for display
@@ -1409,12 +1479,23 @@ function parseCSV(content) {
         data.push(row);
     }
     
-    return {
+    // Detect column types
+    const columnTypes = {};
+    header.forEach(column => {
+        const columnValues = data.map(row => row[column]);
+        const numericValues = columnValues.filter(val => !isNaN(parseFloat(val)) && isFinite(val));
+        columnTypes[column] = numericValues.length > 0.7 * columnValues.length ? 'numeric' : 'categorical';
+    });
+    
+    currentDatasetInfo = {
         header,
         data,
         rowCount: data.length,
-        columnCount: header.length
+        columnCount: header.length,
+        columnTypes
     };
+    
+    return currentDatasetInfo;
 }
 
 // Display dataset information
@@ -1594,4 +1675,105 @@ function analyzeDataset(data) {
         categoricalColumns,
         columnStats
     };
+}
+
+// Global variable to store current dataset information
+let currentDatasetInfo = null;
+let modelTrained = false;
+
+// Initialize prediction features
+function initPredictionFeatures() {
+    const predictButton = document.getElementById('predict-btn');
+    const predictionInputs = document.getElementById('prediction-inputs');
+    const noModelMessage = document.getElementById('no-model-message');
+    
+    if (!predictButton || !predictionInputs || !noModelMessage) return;
+    
+    // Initially disable predict button
+    predictButton.disabled = true;
+    
+    // Handle predict button click
+    predictButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        if (!modelTrained) {
+            showNotification('Please train a model first', 'warning');
+            return;
+        }
+        
+        simulatePrediction();
+    });
+}
+
+// Update prediction UI after model training
+function updatePredictionFeatures(algorithm, metrics, datasetInfo) {
+    // Show prediction inputs and enable prediction button
+    const noModelMessage = document.getElementById('no-model-message');
+    const predictionInputs = document.getElementById('prediction-inputs');
+    const predictButton = document.getElementById('predict-btn');
+    const predictionResult = document.getElementById('prediction-result');
+    
+    if (!noModelMessage || !predictionInputs || !predictButton || !predictionResult) return;
+    
+    // Reset prediction result
+    const predictionValue = document.getElementById('prediction-value');
+    const confidenceFill = document.getElementById('confidence-fill');
+    const confidenceValue = document.getElementById('confidence-value');
+    
+    if (predictionValue && confidenceFill && confidenceValue) {
+        predictionValue.textContent = '--';
+        confidenceFill.style.width = '0%';
+        confidenceValue.textContent = '--';
+    }
+    
+    // If we have dataset information, create input fields
+    if (datasetInfo && datasetInfo.header) {
+        // Clear existing inputs
+        predictionInputs.innerHTML = '';
+        
+        // Analyze column types if not already done
+        const columnTypes = {};
+        if (!datasetInfo.columnTypes) {
+            datasetInfo.header.forEach(feature => {
+                // Simple heuristic: check first 5 values
+                const values = datasetInfo.data.slice(0, 5).map(row => row[feature]);
+                const numericValues = values.filter(val => !isNaN(parseFloat(val)) && isFinite(val));
+                columnTypes[feature] = numericValues.length >= values.length / 2 ? 'numeric' : 'categorical';
+            });
+            datasetInfo.columnTypes = columnTypes;
+        }
+        
+        // Create input fields for each feature
+        datasetInfo.header.forEach((feature, index) => {
+            // Skip target variable (usually last column) for supervised algorithms
+            if (index === datasetInfo.header.length - 1 && algorithm !== 'k_means_clustering') return;
+            
+            const type = datasetInfo.columnTypes[feature] || 'categorical';
+            
+            let inputHTML = '';
+            if (type === 'numeric') {
+                inputHTML = `
+                    <div class="input-field" style="animation: fadeIn 0.3s ease forwards; animation-delay: ${0.1 * index}s; opacity: 0;">
+                        <label>${feature}</label>
+                        <input type="number" step="any" data-feature="${feature}" data-type="numeric" placeholder="Enter numeric value">
+                    </div>
+                `;
+            } else {
+                inputHTML = `
+                    <div class="input-field" style="animation: fadeIn 0.3s ease forwards; animation-delay: ${0.1 * index}s; opacity: 0;">
+                        <label>${feature}</label>
+                        <input type="text" data-feature="${feature}" data-type="categorical" placeholder="Enter categorical value">
+                    </div>
+                `;
+            }
+            
+            predictionInputs.innerHTML += inputHTML;
+        });
+        
+        // Show inputs and enable predict button
+        noModelMessage.style.display = 'none';
+        predictionInputs.style.display = 'flex';
+        predictButton.disabled = false;
+        modelTrained = true;
+    }
 } 

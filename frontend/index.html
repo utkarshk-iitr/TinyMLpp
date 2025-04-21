@@ -236,34 +236,27 @@
                             </div>
                         </div>
                         <div class="card-content">
-                            <div id="prediction-inputs" class="prediction-inputs">
-                                <div class="input-field">
-                                    <label>Feature 1</label>
-                                    <input type="number" placeholder="Enter value">
-                                </div>
-                                <div class="input-field">
-                                    <label>Feature 2</label>
-                                    <input type="number" placeholder="Enter value">
-                                </div>
-                                <div class="input-field">
-                                    <label>Feature 3</label>
-                                    <input type="number" placeholder="Enter value">
-                                </div>
+                            <div id="no-model-message" class="no-algo-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <p>Please train a model first before making predictions</p>
                             </div>
-                            <div id="prediction-result" class="prediction-result">
+                            <div id="prediction-inputs" class="prediction-inputs" style="display: none;">
+                                <!-- Feature inputs will be dynamically generated here based on the dataset -->
+                            </div>
+                            <div id="prediction-result" class="prediction-result" style="display: none;">
                                 <div class="result-label">Prediction Result</div>
-                                <div class="result-value">Class A</div>
-                                <div class="result-confidence">
+                                <div class="result-value" id="prediction-value">--</div>
+                                <div class="result-confidence" id="confidence-container">
                                     <div class="confidence-label">Confidence</div>
                                     <div class="confidence-bar">
-                                        <div class="confidence-fill" style="width: 85%"></div>
-                                        <span class="confidence-value">85%</span>
+                                        <div class="confidence-fill" id="confidence-fill" style="width: 0%"></div>
+                                        <span class="confidence-value" id="confidence-value">--</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="card-footer">
-                            <button id="predict-btn" class="primary-btn">
+                            <button id="predict-btn" class="primary-btn" disabled>
                                 <i class="fas fa-magic"></i> Predict
                             </button>
                         </div>

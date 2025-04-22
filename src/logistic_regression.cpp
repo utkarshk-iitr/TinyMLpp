@@ -146,7 +146,7 @@ public:
         }
         // cout<<theta[2]<<endl;
         gp << "set terminal pngcairo size 800,600 enhanced font 'Arial,10'\n";
-        gp << "set output './imgs/logistic_plot.png'\n";
+        gp << "set output './imgs/graph.png'\n";
         gp << "set title 'Logistic Regression'\n";
         gp << "set xlabel 'x1'\n";
         gp << "set ylabel 'x2'\n";

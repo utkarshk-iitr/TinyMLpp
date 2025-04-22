@@ -295,7 +295,7 @@ public:
         };
 
         gp << "set terminal pngcairo size 800,600 enhanced font 'Arial,10'\n";
-        gp << "set output './imgs/kmeans_plot.png'\n";
+        gp << "set output './imgs/graph.png'\n";
         gp << "set title 'K-Means Clustering (k = " << k << ")'\n";
         gp << "set xlabel 'Feature 1'\n";
         gp << "set ylabel 'Feature 2'\n";

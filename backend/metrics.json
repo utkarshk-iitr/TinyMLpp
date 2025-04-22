@@ -1,8 +1,6 @@
 {
-  "time_ms": 262.865,
-  "memory_kb": 4224,
-  "accuracy": 78.4314,
-  "precision": 72.7273,
-  "recall": 50,
-  "f1_score": 59.2593
+  "time_ms": 203.232,
+  "memory_kb": 3968,
+  "r2": 83.9601,
+  "mse": 264.35
 }

@@ -49,7 +49,7 @@ bool compareVectors(const vector<double>& a, const vector<double>& b, double tol
 int main() {
     try {
         // 1. Load and preprocess data.
-        string filename = "./datasets/placementt.csv";
+        string filename = "./datasets/placement.csv";
         Data data = readCSV(filename);
         // displayDataFrame(data);
         standardize(data);

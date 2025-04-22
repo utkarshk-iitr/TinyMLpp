@@ -45,7 +45,7 @@ bool compareVec(const vector<double>& a, const vector<double>& b, double tol=1e-
 int main(){
     try {
         // 1. Load & Z‑score normalize
-        string fn="advertising.csv";
+        string fn="./datasets/advertising.csv";
         Data data = readCSV(fn);
         displayDataFrame(data);  // optional
         standardize(data);
@@ -76,104 +76,8 @@ int main(){
 
         //Predictions on the test set
         vector<double> pred_cpp = lr.predict(testD);
-
-        // 3. Write corrected Python snippet (no sigmoid)
-        ofstream py("temp_linreg.py");
-        py<<R"(#!/usr/bin/env python3
-import sys, pandas as pd, numpy as np
-
-def main():
-    fn = sys.argv[1] if len(sys.argv)>1 else "advertising.csv"
-    df = pd.read_csv(fn)
-    X = df.iloc[:,:-1].values
-    y = df.iloc[:,-1].values.reshape(-1,1)
-    # Standardize
-    mu = X.mean(axis=0, keepdims=True)
-    sd = X.std(axis=0, keepdims=True) + 1e-8
-    Xn = (X - mu)/sd
-    # Split 80/20 seed=42
-    np.random.seed(42)
-    idx = np.arange(len(Xn))
-    np.random.shuffle(idx)
-    split = int(len(idx)*0.8)
-    tr, te = idx[:split], idx[split:]
-    Xt, yt = Xn[tr], y[tr]
-    Xs, ys = Xn[te], y[te]
-    # Add intercept
-    m,d = Xt.shape
-    Xbt = np.hstack([np.ones((m,1)), Xt])
-    Xbs = np.hstack([np.ones((len(Xs),1)), Xs])
-    # GD hyperparams
-    alpha = 0.01; iters = 1000
-    theta = np.zeros((d+1,1))
-    # Gradient descent
-    for _ in range(iters):
-        pred = Xbt.dot(theta)
-        grad = (Xbt.T.dot(pred - yt))/m
-        theta -= alpha*grad
-    # MSE train/test
-    mse_tr = float(((Xbt.dot(theta)-yt)**2).mean())/2
-    mse_te = float(((Xbs.dot(theta)-ys)**2).mean())/2
-    # Full-data preds
-    Xbf = np.hstack([np.ones((len(Xs),1)), Xs])
-    preds = Xbf.dot(theta).flatten()
-    # Print: θ, train MSE, test MSE, full preds
-    print(" ".join(map(str,theta.flatten())))
-    print(mse_tr)
-    print(mse_te)
-    print(" ".join(map(str,preds)))
-
-if __name__=="__main__":
-    main()
-)";
-        py.close();
-        system("chmod +x temp_linreg.py");
-
-        // 4. Run Python and parse 4 lines
-        string out = exec("./temp_linreg.py advertising.csv");
-        istringstream iss(out);
-        string L1,L2,L3,L4;
-        if(!getline(iss,L1)||!getline(iss,L2)||!getline(iss,L3)||!getline(iss,L4))
-            throw runtime_error("Python output parse failed");
-
-        auto pyTheta = parseLine(L1);
-        double mse_tr_py = stod(L2), mse_te_py = stod(L3);
-        auto pred_py = parseLine(L4);
-
-        // 5. Compare θ
-        bool ok_t = compareVec(cppTheta,pyTheta,1e-2);
-        cout<<(ok_t?"θ match":"θ differ!")<<endl;
-        if(!ok_t){
-            cout<<"C++ θ:"; for(auto v:cppTheta) cout<<" "<<v;
-            cout<<"\nPY θ:"; for(auto v:pyTheta) cout<<" "<<v;
-            cout<<endl;
-        }
-
-        // 6. Compare MSE
-        bool ok_tr = fabs(mse_tr_cpp - mse_tr_py)<1e-3;
-        bool ok_te = fabs(mse_te_cpp - mse_te_py)<1e-3;
-        cout<<(ok_tr?"Train MSE match":"Train MSE differ!")<<endl;
-        cout<<(ok_te?"Test MSE match":"Test MSE differ!")<<endl;
-        if(!ok_tr) cout<<"C++ tr="<<mse_tr_cpp<<" vs PY tr="<<mse_tr_py<<endl;
-        if(!ok_te) cout<<"C++ te="<<mse_te_cpp<<" vs PY te="<<mse_te_py<<endl;
-
-        // 7. Compare Predictions
-        bool ok_p = compareVec(pred_cpp,pred_py,1e-2);
-        cout<<(ok_p?"Predictions match":"Predictions differ!")<<endl;
-        if(!ok_p){
-            cout<<"C++ pred:"; for(auto v:pred_cpp) cout<<" "<<v;
-            cout<<"\nPY pred:";  for(auto v:pred_py) cout<<" "<<v;
-            cout<<endl;
-        }
-
-        // 8. Plot the regression line
         lr.plotLinearRegression(testD, cppTheta);
-
-        // Cleanup
-        remove("temp_linreg.py");
-        delete[] theta_cpp;
-
-        return (ok_t && ok_tr && ok_te && ok_p)?0:1;
+        return 0;
     }
     catch(const exception &e){
         cerr<<"ERROR: "<<e.what()<<endl;

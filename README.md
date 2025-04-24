@@ -3,9 +3,10 @@
 ## Running the Project
 Although we have a fully working website you don't need to write to any sort of commands, GUI just works perfectly. 
 
-Starting backend, 
+Starting backend, navigate to backend directory then type
 ```bash
-
+npm i
+node index.js
 ```
 
 For extra enthusiastic people, to run the project, use the following command:
@@ -35,7 +36,7 @@ You can install the prerequisites using the following commands:
 
 ```bash
 sudo apt update
-sudo apt install 
+sudo apt install libboost-iostreams-dev libboost-system-dev gnuplot libgnuplot-iostream-dev
 ```
 
 Once the prerequisites are installed, you can compile and run the project as described above.

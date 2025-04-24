@@ -159,7 +159,7 @@ public:
     
         // Plot settings
         gp << "set terminal pngcairo size 800,600 enhanced font 'Arial,10'\n";
-        gp << "set output './imgs/graph.png'\n";
+        gp << "set output '../imgs/graph.png'\n";
         gp << "set title 'Linear Regression Fit'\n";
         gp << "set xlabel 'Feature 1'\n";
         gp << "set ylabel 'Target'\n";

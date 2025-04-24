@@ -188,7 +188,6 @@ int main(int argc, char** argv) {
             precision = computePrecision(yTrue, yPred);
             recall = computeRecall(yTrue, yPred);
             f1 = computeF1Score(yTrue, yPred);
-            
         }
         else if (modelName == "linear_regression") {
             // Regression: compute R^2 = 1 - SSE/SST
@@ -235,8 +234,7 @@ int main(int argc, char** argv) {
                 inertia += dist;
             }
         }
-        
-
+        model->plot(testD); // Plot the model's predictions
         // 7) Write JSON to metrics.json
         ofstream js("metrics.json");
         js << "{\n";

@@ -144,7 +144,7 @@ class SVM : public Model {
         double y_max = *max_element(y_vals.begin(), y_vals.end())*2;
         
         gp << "set terminal pngcairo size 800,600 enhanced font 'Arial,10'\n";
-        gp << "set output './imgs/graph.png'\n";
+        gp << "set output '../imgs/graph.png'\n";
         gp << "set title 'Linear SVM Classification'\n";
         gp << "set xlabel 'Feature 0'\n";
         gp << "set ylabel 'Feature 1'\n";

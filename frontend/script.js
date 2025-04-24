@@ -889,7 +889,6 @@ function initTrainingWorkflow() {
             // Parse the response to get metrics
             const result = await response.json();
             const { metrics } = result;
-            
             // Process metrics based on algorithm type
             const processedMetrics = processMetricsByAlgorithm(selectedAlgorithm, metrics);
             

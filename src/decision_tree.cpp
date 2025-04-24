@@ -370,7 +370,7 @@ public:
         // 3) plot
         Gnuplot gp;
         gp << "set terminal pngcairo size 800,600 enhanced font 'Arial,10'\n";
-        gp << "set output './imgs/graph.png'\n";
+        gp << "set output '../imgs/graph.png'\n";
         gp << "set title 'Decision Boundary'\n";
         gp << "unset key\n";
         gp << "set xrange [" << xmin << ":" << xmax << "]\n";

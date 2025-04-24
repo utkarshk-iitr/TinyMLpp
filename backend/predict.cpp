@@ -127,10 +127,15 @@ int main(int argc, char** argv) {
         vector<string> weight;
         vector<vector<double>> centroid;
         vector<string> feature;
+        Data data;
         parseParams(paramf, feature);
         if(modelName == "k_means_clustering")
         {
             readCSVtoMatrix(weightsf, centroid);
+        }
+        else if(modelName == "knn")
+        {
+            data = readCSV(weightsf);
         }
         else
         parseParams(weightsf, weight);
@@ -182,15 +187,15 @@ int main(int argc, char** argv) {
 
             ofstream js("predict.json");
             js << "{\n";
-            js << "  \"prediction\": "   <<  model.predictSingle(feature)   << "\n";
+            js << "  \"prediction\": "   <<  (model.predictSingle(feature)==-1?0:1)   << "\n";
 
             js << "}\n";
             js.close();
         }
-        else if(modelName == "k-means-clustering")
+        else if(modelName == "k_means_clustering")
         {
            KMeans model(k);
-           
+           model.centroids = centroid;
 
            ofstream js("predict.json");
            js << "{\n";
@@ -199,6 +204,28 @@ int main(int argc, char** argv) {
            js << "}\n";
            js.close();
         // Time & memory measurement start
+        }
+        else if(modelName == "knn")
+        {
+            KNN model(k);
+            model.train(data);
+            vector<double> query;
+            for (auto val : feature) {
+                query.push_back(handle::toDouble(val));
+            }
+            // query.pop_back();
+            string label = model.predictOne(query);
+            
+            ofstream js("predict.json");
+            js << "{\n";
+            js << "  \"prediction\": "   <<  label  << "\n";
+
+            js << "}\n";
+            js.close();
+        }
+        else
+        {
+            throw runtime_error("Unknown model name: " + modelName);
         }
     }
        catch (const exception &ex) 

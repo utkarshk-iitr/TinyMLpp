@@ -17,6 +17,7 @@ using namespace handle;
 class SVM : public Model {
     private:
         std::vector<double> weights;  // w (size = #features)
+        double* params;
         double bias;                  // b
         double C;                     // regularization parameter
     
@@ -63,11 +64,15 @@ class SVM : public Model {
             }
     
             // pack parameters: [b, w₀, w₁, …]
-            double* params = new double[n + 1];
+            double* p = new double[n + 1];
+            params = new double[n+1];
+            p[0] = bias;
             params[0] = bias;
-            for (size_t j = 0; j < n; ++j)
+            for (size_t j = 0; j < n; ++j){
+                p[j + 1] = weights[j];
                 params[j + 1] = weights[j];
-            return static_cast<void*>(params);
+            }
+            return static_cast<void*>(p);
         }
     
         // Predict labels {-1, +1}
@@ -86,7 +91,7 @@ class SVM : public Model {
         }
 
     // 2D plot (only works if features.size()==2)
-    void plot(Data &data, const vector<double>& params) {
+    void plot(Data &data) {
         // Uncomment this to enforce 2D feature check
         // if (data.features.empty() || data.features[0].size() != 2)
         //     throw runtime_error("plotSVM requires exactly 2 features");

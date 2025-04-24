@@ -80,7 +80,7 @@ int main() {
             cout << predicted[i] << " vs " << actual[i] << "\n";
         cout << endl;
 
-        knn.plotKNNResults(testSet, predicted);
+        knn.plot(testSet);
     } catch (const exception &e) {
         cerr << "Error: " << e.what() << endl;
         return 1;

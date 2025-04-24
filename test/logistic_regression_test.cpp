@@ -72,7 +72,7 @@ int main() {
         vector<double> cppProbs = lr.predict(testData);
 
         
-        lr.plotLR(testData, cppTheta);
+        lr.plot(testData);
         return 0;
     }
     catch (const exception &e) {

@@ -76,7 +76,7 @@ int main(){
 
         //Predictions on the test set
         vector<double> pred_cpp = lr.predict(testD);
-        lr.plotLinearRegression(testD, cppTheta);
+        lr.plot(testD);
         return 0;
     }
     catch(const exception &e){

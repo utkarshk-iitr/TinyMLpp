@@ -100,7 +100,7 @@ int main() {
     cout << "]\n";
 
     delete[] params;
-        svm.plotSVM(data, svmParams);
+        svm.plot(data);
     }
     catch (const exception &e) {
         cerr << "Error: " << e.what() << "\n";

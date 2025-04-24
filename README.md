@@ -1,8 +1,14 @@
 # TinyMLpp
 
 ## Running the Project
+Although we have a fully working website you don't need to write to any sort of commands, GUI just works perfectly. 
 
-To run the project, use the following command:
+Starting backend, 
+```bash
+
+```
+
+For extra enthusiastic people, to run the project, use the following command:
 
 ```bash
 g++ ./test/linear_regression_test.cpp ./src/linear_regression.cpp ./src/data_handling.cpp -o tinymlpp -std=c++17 -lboost_iostreams -lboost_system && ./tinymlpp
@@ -22,15 +28,14 @@ g++ ./predict.cpp ../src/logistic_regression.cpp ../src/linear_regression.cpp ..
 
 Ensure you have the following installed to enable graph plotting and testing:
 
-1. **Python 3.10**: Required for integration with Python.
-2. **NumPy**: Python library for numerical computations.
-3. **g++**: A C++ compiler supporting C++17 standard.
+1. **g++**: A C++ compiler supporting C++17 standard.
+2. **gnuplot**: A linux native application used to plot graph. 
 
 You can install the prerequisites using the following commands:
 
 ```bash
 sudo apt update
-sudo apt install g++ python3.10 python3-numpy
+sudo apt install 
 ```
 
 Once the prerequisites are installed, you can compile and run the project as described above.
@@ -40,15 +45,20 @@ Once the prerequisites are installed, you can compile and run the project as des
 ### Test Coverage
 - Linear Regression
 - K-Means Clustering
-
-### Core Algorithms Coded
-- K-Means Clustering
-- Linear Regression
-- Logistic Regression
 - K-Nearest Neighbors (KNN)
+- Logistic Regression
+- Decision Tree
+- SVM
 
-### To-Do
-- Add test coverage for other algorithms.
-- Complete the implementation of remaining core algorithms.
+### Core Algorithims Coded
+- Linear Regression
+- K-Means Clustering
+- K-Nearest Neighbors (KNN)
+- Logistic Regression
+- Decision Tree
+- SVM
+
+### Task Completed
+- Maded a fully working website with a stunning frontend and backend using Node js. 
 - Optimize the performance of the algorithms.
-- Benchmark the algorithms.
+- Benchmark the algorithms. 

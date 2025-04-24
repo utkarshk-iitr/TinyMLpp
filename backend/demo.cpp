@@ -188,6 +188,7 @@ int main(int argc, char** argv) {
             precision = computePrecision(yTrue, yPred);
             recall = computeRecall(yTrue, yPred);
             f1 = computeF1Score(yTrue, yPred);
+            
         }
         else if (modelName == "linear_regression") {
             // Regression: compute R^2 = 1 - SSE/SST

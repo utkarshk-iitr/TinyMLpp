@@ -18,6 +18,7 @@ public:
     // Pure virtual functions to enforce implementation in derived classes.
     virtual void* train(handle::Data &data) = 0;
     virtual std::vector<double> predict(handle::Data &data) = 0;
+    virtual void plot(handle::Data &data) = 0;
     virtual ~Model() {} // Virtual destructor for safe inheritance.
 };
 

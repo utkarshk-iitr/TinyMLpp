@@ -804,7 +804,7 @@ function initTrainingWorkflow() {
       // Add algorithm-specific parameters
       if (
         selectedAlgorithm === "knn" ||
-        selectedAlgorithm === "k-means-clustering"
+        selectedAlgorithm === "k_means_clustering"
       ) {
         apiParams.k = params.k || 3;
       }

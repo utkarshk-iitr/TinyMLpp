@@ -105,7 +105,7 @@ function readMetricsFile(metricsPath, res, req) {
 		// Format numeric values as percentages if appropriate, but maintain original keys
 		for (const [key, value] of Object.entries(metrics)) {
 			// These fields should be kept as is (not formatted as percentages)
-			const nonPercentageFields = ['time_ms', 'memory_kb', 'inertia'];
+			const nonPercentageFields = ['time_ms', 'memory_kb', 'inertia', 'img'];
 			if (nonPercentageFields.includes(key)) {
 				response.metrics[key] = value;
 			} else {

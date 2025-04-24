@@ -129,7 +129,7 @@ public:
     }
     
 
-    void plot(Data &data, vector<double>& theta) {
+    void plot(Data &data) {
         Gnuplot gp;
         
         vector<pair<double, double>> data_points;

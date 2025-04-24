@@ -243,18 +243,18 @@ int main(int argc, char** argv) {
         js << "  \"memory_kb\": " << peakRSS_kb << ",\n";
 
         if (modelName == "k_means_clustering") {
-            js << "  \"inertia\": " << inertia << "\n";
+            js << "  \"inertia\": " << inertia << ",\n";
         } 
         else if (modelName == "linear_regression") {
             js << "  \"r2\": "  << r2*100   << ",\n";
-            js << "  \"mse\": "  << mse   << "\n";
+            js << "  \"mse\": "  << mse   << ",\n";
             // js << "  \"mse\": "       << mse            << "\n";
         } 
         else {
             js << "  \"accuracy\": "  << accuracy*100   << ",\n";
             js << "  \"precision\": " << precision*100  << ",\n";
             js << "  \"recall\": "    << recall*100     << ",\n";
-            js << "  \"f1_score\": "  << f1*100         << "\n";
+            js << "  \"f1_score\": "  << f1*100         << ",\n";
         }
 
         // yaha pe change kiya hai dekh lena
@@ -262,7 +262,7 @@ int main(int argc, char** argv) {
         string filename = "../imgs/graph.png";
         vector<unsigned char> image_data = read_file_binary(filename);
         string encoded_string = base64_encode(image_data);
-        js << "  \"img\": \"" << encoded_string << "\",\n";
+        js << "  \"img\": \"" << encoded_string << "\"\n";
 
         js << "}\n";
         js.close();

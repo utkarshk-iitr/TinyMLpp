@@ -336,7 +336,8 @@ public:
      * Computes node positions using an in-order traversal and plots nodes (with labels inside boxes)
      * and edges (as arrows) to represent the tree structure.
      */
-    void plot(handle::Data &data, double step = 0.05) {
+    void plot(handle::Data &data) {
+        double step = 0.05;
         if (!root) 
             throw runtime_error("Decision tree is empty! Train before plotting.");
         if (data.features.empty() || data.features[0].size() < 2)

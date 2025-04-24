@@ -13,6 +13,18 @@ document.addEventListener("DOMContentLoaded", () => {
   initNotifications();
   initTrainingWorkflow();
   initPredictionFeatures();
+
+  // Show a welcome notification to demonstrate functionality
+  setTimeout(() => {
+    showNotification("Welcome to TinyML Dashboard", "info");
+    
+    // Force update notification indicator
+    const notificationBtn = document.querySelector(".notification-btn");
+    if (notificationBtn) {
+      notificationBtn.classList.remove("no-unread");
+      notificationBtn.classList.add("has-unread");
+    }
+  }, 1000);
 });
 
 // Theme toggle functionality
@@ -116,7 +128,6 @@ function initRangeSliders() {
 // Initialize charts
 function initCharts() {
   initVisualizationChart();
-  initComparisonChart();
 }
 
 function initVisualizationChart() {
@@ -163,60 +174,6 @@ function initVisualizationChart() {
         },
         y: {
           beginAtZero: true,
-          grid: {
-            color: "rgba(0, 0, 0, 0.05)",
-          },
-        },
-      },
-      plugins: {
-        legend: {
-          position: "top",
-        },
-      },
-    },
-  });
-}
-
-function initComparisonChart() {
-  const ctx = document.getElementById("comparison-chart");
-  if (!ctx) return;
-
-  new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Training Time", "Memory Usage", "Accuracy"],
-      datasets: [
-        {
-          label: "C++",
-          data: [0.8, 2.5, 95],
-          backgroundColor: "rgba(91, 134, 229, 0.6)",
-          borderColor: "rgba(91, 134, 229, 1)",
-          borderWidth: 1,
-        },
-        {
-          label: "Python",
-          data: [2.3, 4.6, 93],
-          backgroundColor: "rgba(246, 173, 85, 0.6)",
-          borderColor: "rgba(246, 173, 85, 1)",
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 1000,
-        easing: "easeOutQuart",
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: "rgba(0, 0, 0, 0.05)",
-          },
-        },
-        x: {
           grid: {
             color: "rgba(0, 0, 0, 0.05)",
           },
@@ -512,17 +469,9 @@ function simulateTraining() {
 // Modify the simulatePrediction function to send features to backend
 function simulatePrediction() {
   const predictionResult = document.getElementById("prediction-result");
-  const confidenceFill = document.getElementById("confidence-fill");
-  const confidenceValue = document.getElementById("confidence-value");
   const predictionValue = document.getElementById("prediction-value");
 
-  if (
-    !predictionResult ||
-    !confidenceFill ||
-    !confidenceValue ||
-    !predictionValue
-  )
-    return;
+  if (!predictionResult || !predictionValue) return;
 
   // Add loading class to predict button
   const predictBtn = document.getElementById("predict-btn");
@@ -583,26 +532,38 @@ function simulatePrediction() {
   }
 }
 
-// Add a new function to save features to backend
+// Update the predict function to handle errors better
 async function predict(featureValues) {
   try {
     const featuresString = featureValues.join(', ');
+    const activeAlgorithm = document.querySelector(".algorithm-card.active")?.getAttribute("data-algorithm") || "linear-regression";
+    
+    console.log("Using algorithm:", activeAlgorithm);
+    
+    const requestBody = {
+      features: featuresString,
+      algorithm: activeAlgorithm
+    };
+    
+    // Add k parameter only for relevant algorithms
+    if (["knn", "k_means_clustering"].includes(activeAlgorithm)) {
+      const kValue = parseInt(document.getElementById("k")?.value || 3);
+      requestBody.k = kValue;
+    }
+    
+    console.log("Request body:", requestBody);
+    
     const response = await fetch('http://localhost:3000/predict', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        features: featuresString,
-        algorithm: document.querySelector(".algorithm-card.active")?.getAttribute("data-algorithm") || "default-algorithm",
-        k: ["knn", "k_means_clustering"].includes(document.querySelector(".algorithm-card.active")?.getAttribute("data-algorithm"))
-          ? parseInt(document.getElementById("k")?.value || 3)
-          : null,
-      }),
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
-      throw new Error('Failed to save features');
+      const errorText = await response.text();
+      throw new Error(`Failed to save features: ${errorText}`);
     }
 
     const data = await response.json();
@@ -617,7 +578,7 @@ async function predict(featureValues) {
     }
   } catch (error) {
     console.error('Error saving features:', error);
-    showNotification('Error saving features: ' + error.message, 'error', 5000);
+    showNotification('Error: ' + error.message, 'error', 5000);
   }
 }
 
@@ -1367,9 +1328,6 @@ function initTrainingWorkflow() {
                         <button class="action-btn" onclick="showModelDetails(${index})">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="action-btn">
-                            <i class="fas fa-download"></i>
-                        </button>
                     </div>
                 </div>
             `;
@@ -1427,6 +1385,132 @@ function initNotifications() {
     container.className = "notification-container";
     document.body.appendChild(container);
   }
+   
+  // Add notification dropdown to notification button
+  const notificationBtn = document.querySelector(".notification-btn");
+  if (notificationBtn) {
+    // Initialize with green color (no unread)
+    notificationBtn.classList.add("no-unread");
+    
+    // Create dropdown container
+    const dropdown = document.createElement("div");
+    dropdown.className = "notification-dropdown";
+    dropdown.innerHTML = `
+      <div class="notification-dropdown-header">
+        <h3>Notifications</h3>
+        <button class="clear-all">Clear All</button>
+      </div>
+      <div class="notification-dropdown-body">
+        <div class="notification-dropdown-empty">
+          No notifications yet
+        </div>
+      </div>
+    `;
+    
+    // Add dropdown to header actions
+    const headerActions = notificationBtn.closest(".header-actions");
+    headerActions.appendChild(dropdown);
+    
+    // Toggle dropdown on button click
+    notificationBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle("show");
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!dropdown.contains(e.target) && !notificationBtn.contains(e.target)) {
+        dropdown.classList.remove("show");
+      }
+    });
+    
+    // Clear all notifications
+    const clearAllBtn = dropdown.querySelector(".clear-all");
+    clearAllBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const dropdownBody = dropdown.querySelector(".notification-dropdown-body");
+      dropdownBody.innerHTML = `
+        <div class="notification-dropdown-empty">
+          No notifications yet
+        </div>
+      `;
+      updateNotificationBadge(0);
+    });
+  }
+}
+
+// Global notification counter and list
+window.notificationCount = 0;
+window.notifications = [];
+
+// Update the notification indicator
+function updateNotificationBadge(count) {
+  const notificationBtn = document.querySelector(".notification-btn");
+  if (notificationBtn) {
+    window.notificationCount = count;
+    
+    if (count > 0) {
+      notificationBtn.classList.remove("no-unread");
+      notificationBtn.classList.add("has-unread");
+    } else {
+      notificationBtn.classList.remove("has-unread");
+      notificationBtn.classList.add("no-unread");
+    }
+  }
+}
+
+// Add notification to dropdown
+function addNotificationToDropdown(message, type) {
+  const dropdown = document.querySelector(".notification-dropdown");
+  if (!dropdown) return;
+  
+  const dropdownBody = dropdown.querySelector(".notification-dropdown-body");
+  const emptyNotification = dropdownBody.querySelector(".notification-dropdown-empty");
+  
+  if (emptyNotification) {
+    dropdownBody.innerHTML = "";
+  }
+  
+  // Create notification item
+  const notificationItem = document.createElement("div");
+  notificationItem.className = "notification-dropdown-item";
+  
+  // Icon based on type
+  const icon =
+    type === "success"
+      ? "check-circle"
+      : type === "error"
+      ? "exclamation-circle"
+      : type === "warning"
+      ? "exclamation-triangle"
+      : "info-circle";
+  
+  // Format timestamp
+  const now = new Date();
+  const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  notificationItem.innerHTML = `
+    <div class="notification-dropdown-icon ${type}">
+      <i class="fas fa-${icon}"></i>
+    </div>
+    <div class="notification-dropdown-content">
+      <div class="notification-dropdown-message">${message}</div>
+      <div class="notification-dropdown-time">${timeString}</div>
+    </div>
+  `;
+  
+  // Add to dropdown
+  dropdownBody.prepend(notificationItem);
+  
+  // Store notification
+  window.notifications.push({
+    message,
+    type,
+    timestamp: now
+  });
+  
+  // Update badge
+  updateNotificationBadge(window.notificationCount + 1);
 }
 
 // Show notification function
@@ -1479,6 +1563,9 @@ function showNotification(message, type = "info", duration = 5000) {
 
   // Add to container
   container.appendChild(notification);
+
+  // Add to notification dropdown
+  addNotificationToDropdown(message, type);
 
   // Add animation
   setTimeout(() => {
@@ -1968,13 +2055,8 @@ function updatePredictionFeatures(algorithm, metrics, datasetInfo) {
 
   // Reset prediction result
   const predictionValue = document.getElementById("prediction-value");
-  const confidenceFill = document.getElementById("confidence-fill");
-  const confidenceValue = document.getElementById("confidence-value");
-
-  if (predictionValue && confidenceFill && confidenceValue) {
+  if (predictionValue) {
     predictionValue.textContent = "--";
-    confidenceFill.style.width = "0%";
-    confidenceValue.textContent = "--";
   }
 
   // If we have dataset information, create input fields
@@ -2011,22 +2093,22 @@ function updatePredictionFeatures(algorithm, metrics, datasetInfo) {
       let inputHTML = "";
       if (type === "numeric") {
         inputHTML = `
-                    <div class="input-field" style="animation: fadeIn 0.3s ease forwards; animation-delay: ${
-                      0.1 * index
-                    }s; opacity: 0;">
-                        <label>${feature}</label>
-                        <input type="number" step="any" data-feature="${feature}" data-type="numeric" placeholder="Enter numeric value">
-                    </div>
-                `;
+          <div class="input-field" style="animation: fadeIn 0.3s ease forwards; animation-delay: ${
+            0.1 * index
+          }s; opacity: 0;">
+            <label>${feature}</label>
+            <input type="number" step="any" data-feature="${feature}" data-type="numeric" placeholder="Enter numeric value">
+          </div>
+        `;
       } else {
         inputHTML = `
-                    <div class="input-field" style="animation: fadeIn 0.3s ease forwards; animation-delay: ${
-                      0.1 * index
-                    }s; opacity: 0;">
-                        <label>${feature}</label>
-                        <input type="text" data-feature="${feature}" data-type="categorical" placeholder="Enter categorical value">
-                    </div>
-                `;
+          <div class="input-field" style="animation: fadeIn 0.3s ease forwards; animation-delay: ${
+            0.1 * index
+          }s; opacity: 0;">
+            <label>${feature}</label>
+            <input type="text" data-feature="${feature}" data-type="categorical" placeholder="Enter categorical value">
+          </div>
+        `;
       }
 
       predictionInputs.innerHTML += inputHTML;

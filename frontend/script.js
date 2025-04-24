@@ -509,7 +509,7 @@ function simulateTraining() {
   }, 200);
 }
 
-// Simulate prediction
+// Modify the simulatePrediction function to send features to backend
 function simulatePrediction() {
   const predictionResult = document.getElementById("prediction-result");
   const confidenceFill = document.getElementById("confidence-fill");
@@ -537,6 +537,7 @@ function simulatePrediction() {
   );
   const features = {};
   let missingValues = false;
+  const featureValues = [];
 
   featureInputs.forEach((input) => {
     const featureName = input.getAttribute("data-feature");
@@ -553,8 +554,10 @@ function simulatePrediction() {
     // Convert to appropriate type
     if (featureType === "numeric") {
       features[featureName] = parseFloat(value);
+      featureValues.push(parseFloat(value));
     } else {
       features[featureName] = value;
+      featureValues.push(value);
     }
   });
 
@@ -568,6 +571,9 @@ function simulatePrediction() {
   }
 
   console.log("Prediction features:", features);
+  
+  // Save features to backend
+  saveFeaturesToBackend(featureValues);
 
   // Show prediction result container
   predictionResult.style.display = "block";
@@ -622,6 +628,32 @@ function simulatePrediction() {
       predictBtn.innerHTML = '<i class="fas fa-magic"></i> Predict';
     }
   }, 1500);
+}
+
+// Add a new function to save features to backend
+async function saveFeaturesToBackend(featureValues) {
+  try {
+    const featuresString = featureValues.join(',');
+    
+    const response = await fetch('http://localhost:3000/save-features', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ features: featuresString }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save features');
+    }
+
+    const data = await response.json();
+    console.log('Features saved successfully:', data);
+    showNotification('Features saved successfully', 'success', 2000);
+  } catch (error) {
+    console.error('Error saving features:', error);
+    showNotification('Error saving features: ' + error.message, 'error', 5000);
+  }
 }
 
 function initAlgorithmCards() {

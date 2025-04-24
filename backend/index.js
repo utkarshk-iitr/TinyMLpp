@@ -120,6 +120,29 @@ function readMetricsFile(metricsPath, res, req) {
 	});
 }
 
+// Endpoint to save prediction features
+app.post('/save-features', (req, res) => {
+	const { features } = req.body;
+	if (!features) {
+		return res.status(400).json({ error: 'No features provided' });
+	}
+	
+	const fs = require('fs');
+	const path = require('path');
+	const featuresPath = path.join(__dirname, 'features.txt');
+	
+	// Save features to features.txt
+	fs.writeFile(featuresPath, features, (err) => {
+		if (err) {
+			console.error('Error saving features:', err);
+			return res.status(500).json({ error: 'Failed to save features' });
+		}
+		
+		console.log('Features saved successfully:', features);
+		res.json({ success: true, message: 'Features saved successfully' });
+	});
+});
+
 // Start the server             
 app.listen(PORT, () => {    
 	console.log(`Server is running on http://localhost:${PORT}`);

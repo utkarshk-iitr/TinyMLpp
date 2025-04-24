@@ -46,7 +46,7 @@ void parseArgs(int argc, char** argv,string &modelName,string &paramf, string &w
     if (modelName.empty() || paramf.empty() || weightsf.empty()) {
         throw runtime_error(
             "Usage: ./predict --model \"<model>\" "
-            "--weights \"weights.json\" "
+            "--weights \"weights.txt\" "
             "--features \"features.txt\""
             "--kvalue \"<k_value>\""
         );
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
         else
         parseParams(weightsf, weight);
 
-        if(modelName == "linear_regression")
+        if(modelName == "linear-regression")
         {
             LinearRegression model;
 
@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
             js << "}\n";
             js.close();
         }
-        else if(modelName == "logistic_regression")
+        else if(modelName == "logistic-regression")
         {
             LogisticRegression model;
 
@@ -187,7 +187,7 @@ int main(int argc, char** argv) {
             js << "}\n";
             js.close();
         }
-        else if(modelName == "k_means_clustering")
+        else if(modelName == "k-means-clustering")
         {
            KMeans model(k);
            

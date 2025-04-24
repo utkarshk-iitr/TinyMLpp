@@ -573,74 +573,32 @@ function simulatePrediction() {
   console.log("Prediction features:", features);
   
   // Save features to backend
-  saveFeaturesToBackend(featureValues);
+  predict(featureValues);
 
   // Show prediction result container
   predictionResult.style.display = "block";
-
-  // In a real implementation, this would call the API with the features
-  // For demonstration, simulate a response
-
-  // Simulate API call
-  setTimeout(() => {
-    // Update result based on current algorithm
-    const activeAlgorithm = document.querySelector(".algorithm-card.active");
-    let predictionOutput = "--";
-    let confidence = 0;
-
-    if (activeAlgorithm) {
-      const algorithm = activeAlgorithm.getAttribute("data-algorithm");
-
-      if (algorithm === "linear-regression") {
-        // Regression result - numeric output
-        predictionOutput = (Math.random() * 100).toFixed(2);
-        confidence = 85 + Math.random() * 10;
-      } else if (
-        algorithm === "logistic-regression" ||
-        algorithm === "svm" ||
-        algorithm === "decision-tree" ||
-        algorithm === "knn"
-      ) {
-        // Classification result - categorical output
-        const classes = ["Class A", "Class B", "Class C"];
-        predictionOutput = classes[Math.floor(Math.random() * classes.length)];
-        confidence = 75 + Math.random() * 20;
-      } else if (algorithm === "k_means_clustering") {
-        // Clustering result - cluster number
-        const cluster = Math.floor(Math.random() * 5) + 1;
-        predictionOutput = `Cluster ${cluster}`;
-        confidence = 80 + Math.random() * 15;
-      }
-    }
-
-    // Update the prediction value
-    predictionValue.textContent = predictionOutput;
-
-    // Animate confidence bar
-    confidenceFill.style.width = "0%";
-    setTimeout(() => {
-      confidenceFill.style.width = `${confidence}%`;
-      confidenceValue.textContent = `${Math.round(confidence)}%`;
-    }, 300);
-
-    if (predictBtn) {
-      predictBtn.disabled = false;
-      predictBtn.innerHTML = '<i class="fas fa-magic"></i> Predict';
-    }
-  }, 1500);
+  if (predictBtn) {
+    predictBtn.disabled = false;
+    predictBtn.innerHTML = '<i class="fas fa-magic"></i> Predict';
+  }
 }
 
 // Add a new function to save features to backend
-async function saveFeaturesToBackend(featureValues) {
+async function predict(featureValues) {
   try {
-    const featuresString = featureValues.join(',');
-    
-    const response = await fetch('http://localhost:3000/save-features', {
+    const featuresString = featureValues.join(', ');
+    const response = await fetch('http://localhost:3000/predict', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ features: featuresString }),
+      body: JSON.stringify({
+        features: featuresString,
+        algorithm: document.querySelector(".algorithm-card.active")?.getAttribute("data-algorithm") || "default-algorithm",
+        k: ["knn", "k_means_clustering"].includes(document.querySelector(".algorithm-card.active")?.getAttribute("data-algorithm"))
+          ? parseInt(document.getElementById("k")?.value || 3)
+          : null,
+      }),
     });
 
     if (!response.ok) {
@@ -648,8 +606,15 @@ async function saveFeaturesToBackend(featureValues) {
     }
 
     const data = await response.json();
-    console.log('Features saved successfully:', data);
-    showNotification('Features saved successfully', 'success', 2000);
+
+    // Extract prediction and display it
+    if (data && data.prediction) {
+        console.log("Prediction:", data.prediction.prediction);
+        document.getElementById("prediction-value").textContent = data.prediction.prediction;
+    } else {
+        console.error("Prediction not found in response:", data);
+        showNotification("Error: Prediction not found in response", "error");
+    }
   } catch (error) {
     console.error('Error saving features:', error);
     showNotification('Error saving features: ' + error.message, 'error', 5000);

@@ -67,7 +67,7 @@ app.post('/train', (req, res) => {
 				console.error(`Error output: ${stderr}`);
 				return res.status(500).send({ error: stderr });
 			}
-			console.log(`Command output: ${stdout}`);
+			// console.log(`Command output: ${stdout}`);
 
 			// Read and process the metrics.json file
 			readMetricsFile(path.join(__dirname, './metrics.json'), res, req);
@@ -89,7 +89,7 @@ function readMetricsFile(metricsPath, res, req) {
 		let metrics;
 		try {
 			metrics = JSON.parse(data);
-			console.log('Original metrics from file:', metrics);
+			// console.log('Original metrics from file:', metrics);
 		} catch (parseErr) {
 			console.error('Error parsing metrics file:', parseErr);
 			return res.status(500).send({ error: 'Error parsing metrics file.' });
@@ -114,15 +114,16 @@ function readMetricsFile(metricsPath, res, req) {
 			}
 		}
 
-		console.log('Response metrics:', response.metrics);
+		// console.log('Response metrics:', response.metrics);
 		// Send the response as JSON
 		res.json(response);
 	});
 }
 
 // Endpoint to save prediction features
-app.post('/save-features', (req, res) => {
-	const { features } = req.body;
+app.post('/predict', async (req, res) => {
+	console.log('Received prediction request:', req.body);
+	const { features,algorithm,k } = req.body;
 	if (!features) {
 		return res.status(400).json({ error: 'No features provided' });
 	}
@@ -132,14 +133,51 @@ app.post('/save-features', (req, res) => {
 	const featuresPath = path.join(__dirname, 'features.txt');
 	
 	// Save features to features.txt
-	fs.writeFile(featuresPath, features, (err) => {
-		if (err) {
-			console.error('Error saving features:', err);
-			return res.status(500).json({ error: 'Failed to save features' });
+	try {
+		await fs.promises.writeFile(featuresPath, features);
+	} catch (err) {
+		console.error('Error saving features:', err);
+		return res.status(500).json({ error: 'Failed to save features' });
+	}
+	// Execute the prediction command
+	const { exec } = require('child_process');
+	let command = `./predict `;
+	if (algorithm) {
+		command += `--model "${algorithm}" `;
+	}
+	if (k) {
+		command += `--kvalue ${k} `;
+	} else {
+		command += `--kvalue 3 `;
+	}
+	command += `--features "features.txt" `;
+	command += `--weights "weights.txt" `;
+	exec(command, (error, stdout, stderr) => {
+		if (error) {
+			console.error(`Error executing command: ${error.message}`);
+			return res.status(500).json({ error: error.message });
 		}
-		
-		console.log('Features saved successfully:', features);
-		res.json({ success: true, message: 'Features saved successfully' });
+		if (stderr) {
+			console.error(`Error output: ${stderr}`);
+			return res.status(500).json({ error: stderr });
+		}
+		console.log(`Command output: ${stdout}`);
+
+		// Read the prediction result from the output file
+		const predictionPath = path.join(__dirname, 'predict.json');
+		fs.readFile(predictionPath, 'utf8', (readErr, data) => {
+			if (readErr) {
+				console.error('Error reading prediction file:', readErr);
+				return res.status(500).json({ error: 'Error reading prediction file.' });
+			}
+			try {
+				const prediction = JSON.parse(data);
+				res.json({ prediction });
+			} catch (parseErr) {
+				console.error('Error parsing prediction file:', parseErr);
+				return res.status(500).json({ error: 'Error parsing prediction file.' });
+			}
+		});
 	});
 });
 

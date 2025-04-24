@@ -1,1 +1,0 @@
-sudo apt install libboost-iostreams-dev libboost-system-dev gnuplot libgnuplot-iostream-dev

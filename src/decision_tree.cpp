@@ -328,6 +328,23 @@ public:
         return predictions;
     }
 
+    double predictSingle(vector<string>& features) {
+        if (features.empty()) {
+            throw runtime_error("Empty feature vector provided for prediction.");
+        }
+    
+        size_t numFeatures = features.size();
+        vector<double> x(numFeatures, 0.0);
+        
+        for (size_t j = 0; j < numFeatures; j++) {
+            x[j] = handle::toDouble(features[j]);
+        }
+    
+        int prediction = traverseTree(root, x);
+        return static_cast<double>(prediction);
+    }
+    
+
     /**
      * @brief Plots the decision tree using gnuplot-iostream.
      * 

@@ -218,21 +218,20 @@ public:
      * @param target A string representing the target value (treated as an additional feature).
      * @return The cluster index (as an integer) assigned to this data point.
      */
-    int predictSingle(vector<string>& features, string& target) {
+    int predictSingle(vector<string>& features) {
         size_t expectedDim = centroids.empty() ? 0 : centroids[0].size();
         if (expectedDim == 0) {
             throw runtime_error("Model has not been trained. No centroids available.");
         }
 
         vector<double> point(expectedDim, 0.0);
-        if (features.size() + 1 != expectedDim) {
+        if (features.size() != expectedDim) {
             throw runtime_error("Feature dimension mismatch with trained model.");
         }
 
         for (size_t j = 0; j < features.size(); j++) {
             point[j] = handle::toDouble(features[j]);
         }
-        point[expectedDim - 1] = handle::toDouble(target);  // Append target value.
 
         double minDist = DBL_MAX;
         int bestCluster = -1;

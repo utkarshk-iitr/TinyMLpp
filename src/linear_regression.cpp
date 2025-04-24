@@ -113,7 +113,7 @@ public:
         return out;
     }
     
-    double predictsingle(vector<string> &features) {
+    double predictSingle(vector<string> &features) {
         size_t n = features.size();
         if (theta.size() != n + 1) {
             throw runtime_error("Model not trained or feature size mismatch");

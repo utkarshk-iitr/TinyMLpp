@@ -74,20 +74,20 @@ class SVM : public Model {
             return static_cast<void*>(p);
         }
     
-        // Predict labels {-1, +1}
-        std::vector<double> predict(Data &data) override {
-            size_t m = data.features.size();
-            size_t n = data.features[0].size();
-            std::vector<double> preds(m);
-    
-            for (size_t i = 0; i < m; ++i) {
-                double sum = bias;
-                for (size_t j = 0; j < n; ++j)
-                    sum += weights[j] * toDouble(data.features[i][j]);
-                preds[i] = (sum >= 0.0 ? 1.0 : -1.0);
-            }
-            return preds;
+    // Predict labels {-1, +1}
+    std::vector<double> predict(Data &data) override {
+        size_t m = data.features.size();
+        size_t n = data.features[0].size();
+        std::vector<double> preds(m);
+
+        for (size_t i = 0; i < m; ++i) {
+            double sum = bias;
+            for (size_t j = 0; j < n; ++j)
+                sum += weights[j] * toDouble(data.features[i][j]);
+            preds[i] = (sum >= 0.0 ? 1.0 : -1.0);
         }
+        return preds;
+    }
 
     // 2D plot (only works if features.size()==2)
     void plot(Data &data) {
@@ -159,6 +159,19 @@ class SVM : public Model {
         gp.send1d(pos_points);
         gp.send1d(neg_points);
         gp.send1d(boundary);
+    }
+
+    double predictSingle(vector<string> &features) {
+        size_t m = features.size();
+
+        double sum = bias;
+        for (size_t i = 0; i < m; ++i) {
+            
+            sum += weights[i] * toDouble(features[i]);
+            
+        }
+        double preds = (sum >= 0.0 ? 1.0 : -1.0);
+        return preds;
     }
 };
 

@@ -110,6 +110,8 @@ int main(int argc, char** argv) {
         auto t0 = clock::now();
 
         // 2) Load & normalize full dataset
+        cout<<endl;
+        cout<<k<<endl;
         Data all = readCSV(datasetFile);
         displayDataFrame(all);
         if(modelName != "k_means_clustering")
@@ -141,6 +143,7 @@ int main(int argc, char** argv) {
         }
         else if (modelName == "k_means_clustering") {
             model = new KMeans(k, epochs, 1e-4); // lr is not used in KMeans
+            
         }
         else if(modelName == "decision_tree") {
             model = new DecisionTree(lr, epochs); // lr is not used in DecisionTree

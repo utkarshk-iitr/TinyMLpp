@@ -8,6 +8,10 @@ To run the project, use the following command:
 g++ ./test/linear_regression_test.cpp ./src/linear_regression.cpp ./src/data_handling.cpp -o tinymlpp -std=c++17 -lboost_iostreams -lboost_system && ./tinymlpp
 ```
 
+```bash
+g++ ./demo.cpp ../src/logistic_regression.cpp ../src/linear_regression.cpp ../src/knn.cpp ../src/k_means_clustering.cpp ../src/decision_tree.cpp ../src/svm.cpp ../src/data_handling.cpp -lboost_iostreams -lboost_system -o demo
+```
+
 **Note**: The above command works only for Linux. For Windows, replace the file paths with the appropriate paths on your system after installing the required dependencies.
 
 ## Prerequisites

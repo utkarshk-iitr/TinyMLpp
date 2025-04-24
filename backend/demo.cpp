@@ -142,6 +142,9 @@ int main(int argc, char** argv) {
         else if (modelName == "k_means_clustering") {
             model = new KMeans(k, epochs, 1e-4); // lr is not used in KMeans
         }
+        else if(modelName == "decision_tree") {
+            model = new DecisionTree(lr, epochs); // lr is not used in DecisionTree
+        }
         else {
             throw runtime_error("Unknown model: " + modelName);
         }
@@ -233,6 +236,14 @@ int main(int argc, char** argv) {
                 }
                 inertia += dist;
             }
+        }
+        else if(modelName == "decision_tree"){
+            vector<double> yTrue;
+            for (auto &s : testD.target) yTrue.push_back(toDouble(s));
+            accuracy = computeAccuracy(yTrue, preds);
+            precision = computePrecision(yTrue, preds);
+            recall = computeRecall(yTrue, preds);
+            f1 = computeF1Score(yTrue, preds);
         }
         model->plot(testD); // Plot the model's predictions
         // 7) Write JSON to metrics.json

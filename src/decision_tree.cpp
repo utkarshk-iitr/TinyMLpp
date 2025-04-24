@@ -19,7 +19,7 @@ using namespace std;
 
 // A Decision Tree classifier using the Gini impurity measure.
 class DecisionTree : public Model {
-private:
+public:
     // Structure for a node in the decision tree.
     struct Node {
         int featureIndex;      // Index of the feature used for splitting.
@@ -237,8 +237,6 @@ private:
             collectNodesAndEdges(node->right, coords, edges, nodeLabels);
         }
     }
-
-public:
     /**
      * @brief Constructor for DecisionTree classifier.
      * 

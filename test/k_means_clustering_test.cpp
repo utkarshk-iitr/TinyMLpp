@@ -59,7 +59,7 @@ int main() {
         for (double d : cppAssignmentsDouble) {
             cppAssignments.push_back(static_cast<int>(d));
         }
-        kmeans.plotKMeansClusters(data, cppAssignments, 3);
+        kmeans.plot(data);
     } catch (const exception &e) {
         cerr << "Test failed: " << e.what() << endl;
         return 1;

@@ -64,7 +64,7 @@ int main() {
             cout << pred << " ";
         }
         cout << endl;
-        dt.plot(data,0.1);
+        dt.plot(data);
 
     } catch (const exception &e) {
         cerr << "Error: " << e.what() << endl;

@@ -15,13 +15,12 @@
 using namespace handle;
 
 class SVM : public Model {
-    private:
+    public:
         std::vector<double> weights;  // w (size = #features)
         double* params;
         double bias;                  // b
         double C;                     // regularization parameter
     
-    public:
         // C: penalty term, lr: learning rate, ep: epochs
         SVM(double C_ = 1.0, double lr = 0.001, int ep = 1000)
           : Model(lr, ep), C(C_), bias(0.0) {}

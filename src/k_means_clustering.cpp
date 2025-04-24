@@ -18,7 +18,7 @@ using namespace std;
 // namespace plt = matplotlibcpp;
 
 class KMeans : public Model {
-private:
+public:
     int k;                       // Number of clusters.
     int maxIterations;           // Maximum number of iterations.
     double tol;                  // Tolerance for centroid movement.
@@ -41,7 +41,6 @@ private:
         return sqrt(sum);
     }
 
-public:
     /**
      * @brief Constructor for KMeans clustering.
      * 

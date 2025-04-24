@@ -14,7 +14,7 @@ using namespace std;
 using namespace handle;
 
 class LogisticRegression : public Model {
-private:
+public:
     vector<double> theta; // Model parameters: theta[0] is the intercept; theta[1..n] are the feature weights.
 
     // Sigmoid function.
@@ -22,7 +22,6 @@ private:
         return 1.0 / (1.0 + exp(-z));
     }
 
-public:
     // Constructor with optional parameters for learning rate and number of iterations.
     LogisticRegression(double lr = 0.01, int ep = 1000) : Model(lr, ep) {}
 

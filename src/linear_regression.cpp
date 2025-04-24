@@ -22,10 +22,8 @@ static constexpr unsigned DEFAULT_SEED   = 42;
 
 // LinearRegression class definition (methods)
 class LinearRegression : public Model {
-private:
-    vector<double> theta;
-
 public:
+    vector<double> theta;
     LinearRegression(double lr = 0.01, int ep = 1000)
       : Model(lr, ep) {}
 

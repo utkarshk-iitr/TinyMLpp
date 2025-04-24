@@ -16,11 +16,10 @@ using namespace handle;
 using namespace std;
 
 class KNN : public Model {
-private:
+public:
     handle::Data trainingData; // Storage for the training data.
     int k;           // Number of closest neighbours to consider.
 
-public:
     /**
      * @brief Constructor for KNN.
      * 

@@ -268,7 +268,7 @@ public:
      * @param assignments The cluster assignments for each data point.
      * @param k The number of clusters.
      */
-    void plotKMeansClusters(handle::Data &data, vector<int> &assignments, int k) {
+    void plot(handle::Data &data, vector<int> &assignments, int k) {
         if (data.features.empty() || data.features[0].size() < 2) {
             throw runtime_error("Data must have at least two features for 2D plotting.");
         }

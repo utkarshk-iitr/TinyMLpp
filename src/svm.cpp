@@ -86,7 +86,7 @@ class SVM : public Model {
         }
 
     // 2D plot (only works if features.size()==2)
-    void plotSVM(Data &data, const vector<double>& params) {
+    void plot(Data &data, const vector<double>& params) {
         // Uncomment this to enforce 2D feature check
         // if (data.features.empty() || data.features[0].size() != 2)
         //     throw runtime_error("plotSVM requires exactly 2 features");

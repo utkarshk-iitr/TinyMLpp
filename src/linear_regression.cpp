@@ -129,7 +129,7 @@ public:
     }
     
 
-    void plotLinearRegression(Data &data, vector<double>& theta) {
+    void plot(Data &data, vector<double>& theta) {
         Gnuplot gp;
         
         vector<pair<double, double>> data_points;

@@ -125,7 +125,7 @@ public:
     }
 
     
-    void plotKNNResults(handle::Data& testData, vector<double>& predicted) {
+    void plot(handle::Data& testData, vector<double>& predicted) {
         if (testData.features.empty() || testData.features[0].size() < 2) {
             throw runtime_error("Data must have at least two features for 2D plotting.");
         }

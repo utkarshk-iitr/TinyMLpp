@@ -100,7 +100,7 @@ public:
         return (probability >= 0.5) ? 1 : 0;
     }
     
-    void plotLR(Data& data,vector<double>& theta) {
+    void plot(Data& data,vector<double>& theta) {
         Gnuplot gp;
 
         vector<pair<double, double>> class0;

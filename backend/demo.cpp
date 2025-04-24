@@ -87,6 +87,41 @@ map<string,string> parseParams(const string &s) {
     return m;
 }
 
+void writeToFile(vector<double>& weights) {
+    std::ofstream outFile("weights.txt");
+    if (!outFile) {
+        std::cerr << "Failed to open file.\n";
+    }
+
+    for (size_t i = 0; i < weights.size(); ++i) {
+        outFile << weights[i];
+        if (i != weights.size() - 1) {
+            outFile << ", ";
+        }
+    }
+
+    outFile.close();
+    std::cout << "Weights written to weights.txt\n";
+}
+
+void writeToFile(vector<vector<double>>& matrix) {
+    ofstream outFile("weights.txt");
+    if (!outFile) {
+        cerr << "Failed to open file.\n";
+    }
+
+    for (const auto& row : matrix) {
+        for (size_t i = 0; i < row.size(); ++i) {
+            outFile << row[i];
+            if (i != row.size() - 1) {
+                outFile << ", ";
+            }
+        }
+        outFile << "\n"; // Move to next line after each row
+    }
+
+    outFile.close();
+}
 int main(int argc, char** argv) {
     try {
         // 1) Parse command‑line
@@ -105,13 +140,12 @@ int main(int argc, char** argv) {
         int k = params.count("k") ? stoi(params["k"]) : 3; // For KNN, not used here
         double C = params.count("C") ? stod(params["C"]) : 1.0; // For SVM, not used here
 
+        cout<<endl;
         // Time & memory measurement start
         using clock = chrono::high_resolution_clock;
         auto t0 = clock::now();
 
         // 2) Load & normalize full dataset
-        cout<<endl;
-        cout<<k<<endl;
         Data all = readCSV(datasetFile);
         displayDataFrame(all);
         if(modelName != "k_means_clustering")
@@ -183,6 +217,7 @@ int main(int argc, char** argv) {
         double r2 = 0.0;
 
         if (modelName == "logistic_regression") {
+            writeToFile(static_cast<LogisticRegression*>(model)->theta);
             // Classification accuracy
             vector<double> yTrue;
             for (auto &s : testD.target) yTrue.push_back(toDouble(s));
@@ -197,6 +232,7 @@ int main(int argc, char** argv) {
         }
         else if (modelName == "linear_regression") {
             // Regression: compute R^2 = 1 - SSE/SST
+            writeToFile(static_cast<LinearRegression*>(model)->theta);
             vector<double> yTrue;
             for (auto &s : testD.target) yTrue.push_back(toDouble(s));
             double meanY = accumulate(yTrue.begin(), yTrue.end(), 0.0) / yTrue.size();
@@ -218,6 +254,14 @@ int main(int argc, char** argv) {
             f1 = computeF1Score(yTrue, preds);
         }
         else if (modelName == "svm") {
+            vector<double> p;
+            p.push_back(static_cast<SVM*>(model)->bias);
+            for(auto x:static_cast<SVM*>(model)->weights)
+            {
+                p.push_back(x);
+            }
+
+            writeToFile(p);
             // SVM: accuracy is already computed above
             vector<double> yTrue;
             for (auto &s : testD.target) yTrue.push_back(toDouble(s));
@@ -227,6 +271,9 @@ int main(int argc, char** argv) {
             f1 = computeF1Score(yTrue, preds);
         }
         else if (modelName == "k_means_clustering") {
+
+            writeToFile(static_cast<KMeans*>(model)->centroids);
+
             vector<int> assignments = static_cast<KMeans*>(model)->getAssignments();
             const auto& centroids = static_cast<KMeans*>(model)->getCentroids();
         

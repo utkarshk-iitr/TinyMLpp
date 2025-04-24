@@ -144,9 +144,9 @@ int main(int argc, char** argv) {
                 model.theta.push_back(toDouble(x));
             }
 
-            ofstream js("metrics.json");
+            ofstream js("predict.json");
             js << "{\n";
-            js << "  \"prediction\": "   <<  model.predictSingle(feature)   << ",\n";
+            js << "  \"prediction\": "   <<  model.predictSingle(feature)   << "\n";
 
             js << "}\n";
             js.close();
@@ -160,9 +160,9 @@ int main(int argc, char** argv) {
                 model.theta.push_back(toDouble(x));
             }
 
-            ofstream js("metrics.json");
+            ofstream js("predict.json");
             js << "{\n";
-            js << "  \"prediction\": "   <<  model.predictSingle(feature)   << ",\n";
+            js << "  \"prediction\": "   <<  model.predictSingle(feature)   << "\n";
 
             js << "}\n";
             js.close();
@@ -180,9 +180,9 @@ int main(int argc, char** argv) {
                 i++;
             }
 
-            ofstream js("metrics.json");
+            ofstream js("predict.json");
             js << "{\n";
-            js << "  \"prediction\": "   <<  model.predictSingle(feature)   << ",\n";
+            js << "  \"prediction\": "   <<  model.predictSingle(feature)   << "\n";
 
             js << "}\n";
             js.close();
@@ -192,16 +192,17 @@ int main(int argc, char** argv) {
            KMeans model(k);
            
 
-           ofstream js("metrics.json");
+           ofstream js("predict.json");
            js << "{\n";
-           js << "  \"prediction\": "   <<  model.predictSingle(feature)   << ",\n";
+           js << "  \"prediction\": "   <<  model.predictSingle(feature)   << "\n";
 
            js << "}\n";
            js.close();
         // Time & memory measurement start
         }
     }
-       catch (const exception &ex) {
+       catch (const exception &ex) 
+       {
         cerr << "Error: " << ex.what() << "\n";
         return 1;
     }

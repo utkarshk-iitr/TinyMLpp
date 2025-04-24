@@ -13,10 +13,10 @@
 #include "../src/data_handling.h"         // Data, readCSV, standardize, train_test_split, computeLogLoss, computeAccuracy
 #include "../src/linear_regression.cpp"   // LinearRegression
 #include "../src/logistic_regression.cpp" // LogisticRegression
-#include "../src/knn.cpp"               // KNN
-#include "../src/svm.cpp"               // SVM
-#include "../src/k_means_clustering.cpp" // KMeans
-#include "../src/decision_tree.cpp"     // DecisionTree
+#include "../src/knn.cpp"                 // KNN
+#include "../src/svm.cpp"                 // SVM
+#include "../src/k_means_clustering.cpp"  // KMeans
+#include "../src/decision_tree.cpp"       // DecisionTree
 
 // Base64 encoding table
 static const string base64_chars =
@@ -24,96 +24,167 @@ static const string base64_chars =
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789+/";
 
-string base64_encode(const vector<unsigned char>& data) {
+string base64_encode(const vector<unsigned char> &data)
+{
     string encoded;
     int val = 0, valb = -6;
-    for (unsigned char c : data) {
+    for (unsigned char c : data)
+    {
         val = (val << 8) + c;
         valb += 8;
-        while (valb >= 0) {
+        while (valb >= 0)
+        {
             encoded.push_back(base64_chars[(val >> valb) & 0x3F]);
             valb -= 6;
         }
     }
-    if (valb > -6) encoded.push_back(base64_chars[((val << 8) >> (valb + 8)) & 0x3F]);
-    while (encoded.size() % 4) encoded.push_back('=');
+    if (valb > -6)
+        encoded.push_back(base64_chars[((val << 8) >> (valb + 8)) & 0x3F]);
+    while (encoded.size() % 4)
+        encoded.push_back('=');
     return encoded;
 }
 
-vector<unsigned char> read_file_binary(const string& filename) {
+void compute_mu_sigma(const vector<vector<string>> &data,
+                      vector<double> &mu,
+                      vector<double> &sigma)
+{
+    if (data.empty())
+        return;
+
+    size_t rows = data.size();
+    size_t cols = data[0].size();
+
+    mu.assign(cols, 0.0);
+    sigma.assign(cols, 0.0);
+
+    // Compute mean
+    for (const auto &row : data)
+    {
+        for (size_t j = 0; j < cols; ++j)
+        {
+            try
+            {
+                mu[j] += stod(row[j]);
+            }
+            catch (const invalid_argument &)
+            {
+                throw runtime_error("Non-numeric value encountered in column " + to_string(j));
+            }
+        }
+    }
+
+    for (size_t j = 0; j < cols; ++j)
+    {
+        mu[j] /= rows;
+    }
+
+    // Compute standard deviation
+    for (const auto &row : data)
+    {
+        for (size_t j = 0; j < cols; ++j)
+        {
+            double val = stod(row[j]);
+            sigma[j] += pow(val - mu[j], 2);
+        }
+    }
+
+    for (size_t j = 0; j < cols; ++j)
+    {
+        sigma[j] = sqrt(sigma[j] / rows); // population stddev
+    }
+}
+
+
+vector<unsigned char> read_file_binary(const string &filename)
+{
     ifstream file(filename, ios::binary);
     return vector<unsigned char>((istreambuf_iterator<char>(file)), {});
 }
-
 
 using namespace std;
 using namespace handle;
 
 // Simple argv parser for --model and --parameters
-void parseArgs(int argc, char** argv,
+void parseArgs(int argc, char **argv,
                string &modelName,
                string &paramStr)
 {
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i)
+    {
         string arg = argv[i];
-        if (arg == "--model" && i+1 < argc) {
+        if (arg == "--model" && i + 1 < argc)
+        {
             modelName = argv[++i];
         }
-        else if (arg == "--parameters" && i+1 < argc) {
+        else if (arg == "--parameters" && i + 1 < argc)
+        {
             paramStr = argv[++i];
         }
     }
-    if (modelName.empty() || paramStr.empty()) {
+    if (modelName.empty() || paramStr.empty())
+    {
         throw runtime_error(
             "Usage: ./demo --model \"<model>\" "
-            "--parameters \"dataset=path,lr=0.01,epochs=500,k=3,C=1.0\""
-        );
+            "--parameters \"dataset=path,lr=0.01,epochs=500,k=3,C=1.0\"");
     }
 }
 
 // Parse comma‑separated key=val pairs into a map
-map<string,string> parseParams(const string &s) {
-    map<string,string> m;
+map<string, string> parseParams(const string &s)
+{
+    map<string, string> m;
     istringstream ss(s);
     string kv;
-    while (getline(ss, kv, ',')) {
+    while (getline(ss, kv, ','))
+    {
         auto pos = kv.find('=');
-        if (pos != string::npos) {
-            string k = kv.substr(0,pos);
-            string v = kv.substr(pos+1);
+        if (pos != string::npos)
+        {
+            string k = kv.substr(0, pos);
+            string v = kv.substr(pos + 1);
             m[k] = v;
         }
     }
     return m;
 }
 
-void writeToFile(vector<double>& weights) {
-    std::ofstream outFile("weights.txt");
-    if (!outFile) {
-        std::cerr << "Failed to open file.\n";
+void writeToFile(vector<double> &weights)
+{
+    ofstream outFile("weights.txt");
+    if (!outFile)
+    {
+        cerr << "Failed to open file.\n";
     }
 
-    for (size_t i = 0; i < weights.size(); ++i) {
+    for (size_t i = 0; i < weights.size(); ++i)
+    {
         outFile << weights[i];
-        if (i != weights.size() - 1) {
+        if (i != weights.size() - 1)
+        {
             outFile << ", ";
         }
     }
 
     outFile.close();
-    std::cout << "Weights written to weights.txt\n";
+    cout << "Weights written to weights.txt\n";
 }
 
-void writeToFile(vector<vector<double>>& matrix) {
+void writeToFile(vector<vector<double>> &matrix)
+{
     ofstream outFile("weights.txt");
-    if (!outFile) {
+    if (!outFile)
+    {
         cerr << "Failed to open file.\n";
     }
 
-    for (const auto& row : matrix) {
-        for (size_t i = 0; i < row.size(); ++i) {
+    for (const auto &row : matrix)
+    {
+        for (size_t i = 0; i < row.size(); ++i)
+        {
             outFile << row[i];
-            if (i != row.size() - 1) {
+            if (i != row.size() - 1)
+            {
                 outFile << ", ";
             }
         }
@@ -122,8 +193,36 @@ void writeToFile(vector<vector<double>>& matrix) {
 
     outFile.close();
 }
-int main(int argc, char** argv) {
-    try {
+
+void writeToFile(string s1)
+{
+    ifstream csvFile(s1);
+    ofstream txtFile("weights.txt");
+
+    if (!csvFile.is_open()) {
+        cerr << "Failed to open data.csv\n";
+    }
+
+    if (!txtFile.is_open()) {
+        cerr << "Failed to open output.txt\n";
+    }
+
+    string line;
+    while (getline(csvFile, line)) {
+        txtFile << line << '\n';
+    }
+
+    csvFile.close();
+    txtFile.close();
+
+    cout << "CSV contents copied to output.txt\n";
+
+}
+
+int main(int argc, char **argv)
+{
+    try
+    {
         // 1) Parse command‑line
         string modelName, paramStr;
         parseArgs(argc, argv, modelName, paramStr);
@@ -137,63 +236,71 @@ int main(int argc, char** argv) {
         // Optional hyperparameters
         double lr = params.count("lr") ? stod(params["lr"]) : 0.01;
         int epochs = params.count("epochs") ? stoi(params["epochs"]) : 1000;
-        int k = params.count("k") ? stoi(params["k"]) : 3; // For KNN, not used here
+        int k = params.count("k") ? stoi(params["k"]) : 3;      // For KNN, not used here
         double C = params.count("C") ? stod(params["C"]) : 1.0; // For SVM, not used here
 
-        cout<<endl;
+        cout << endl;
         // Time & memory measurement start
         using clock = chrono::high_resolution_clock;
         auto t0 = clock::now();
 
         // 2) Load & normalize full dataset
         Data all = readCSV(datasetFile);
+        Data d = all;
         displayDataFrame(all);
-        if(modelName != "k_means_clustering")
-        standardize(all);
+        if (modelName != "k_means_clustering")
+            standardize(all);
         // 3) Split 80/20, seed=42
         auto [trainD, testD] = train_test_split(all, 0.2, 42);
 
         // 4) Instantiate model
-        Model* model = nullptr;
-        if (modelName == "linear_regression") {
+        Model *model = nullptr;
+        if (modelName == "linear_regression")
+        {
             model = new LinearRegression(lr, epochs);
         }
-        else if (modelName == "logistic_regression") {
+        else if (modelName == "logistic_regression")
+        {
             model = new LogisticRegression(lr, epochs);
         }
-        else if (modelName == "knn") {
+        else if (modelName == "knn")
+        {
             model = new KNN(k, lr, epochs);
         }
-        else if (modelName == "svm") {
+        else if (modelName == "svm")
+        {
             model = new SVM(C, lr, epochs);
-            for (auto &lbl : testD.target) {
+            for (auto &lbl : testD.target)
+            {
                 double y = toDouble(lbl);
                 lbl = (y == 0.0 ? "-1" : "1");
             }
-            for (auto &lbl : trainD.target) {
+            for (auto &lbl : trainD.target)
+            {
                 double y = toDouble(lbl);
                 lbl = (y == 0.0 ? "-1" : "1");
             }
         }
-        else if (modelName == "k_means_clustering") {
+        else if (modelName == "k_means_clustering")
+        {
             model = new KMeans(k, epochs, 1e-4); // lr is not used in KMeans
-            
         }
-        else if(modelName == "decision_tree") {
+        else if (modelName == "decision_tree")
+        {
             model = new DecisionTree(lr, epochs); // lr is not used in DecisionTree
         }
-        else {
+        else
+        {
             throw runtime_error("Unknown model: " + modelName);
         }
 
-
         // Train on training split
-        void* rawTheta;
-        
-        if(modelName !="k_means_clustering")
-        rawTheta = model->train(trainD);
+        void *rawTheta;
+
+        if (modelName != "k_means_clustering")
+            rawTheta = model->train(trainD);
         else
-        rawTheta = model->train(all);
+            rawTheta = model->train(all);
 
         // Predict on test split
         vector<double> preds = model->predict(testD);
@@ -216,80 +323,133 @@ int main(int argc, char** argv) {
         double f1 = 0.0;
         double r2 = 0.0;
 
-        if (modelName == "logistic_regression") {
-            writeToFile(static_cast<LogisticRegression*>(model)->theta);
+        if (modelName == "logistic_regression")
+        {
+            vector<double> theta = static_cast<LogisticRegression *>(model)->theta;
+            
+            int n = theta.size() -1;
+            vector<double> theta_orig(n+1);
+
+            theta_orig[0] = theta[0]; // start with bias
+            vector<double> mu(n), sigma(n);
+            compute_mu_sigma(d.features, mu, sigma); // compute mu & sigma
+            for (int i = 0; i < n; ++i) {
+                theta_orig[i + 1] = theta[i + 1] / sigma[i];                  // adjust weights
+                theta_orig[0] -= (theta[i + 1] * mu[i]) / sigma[i];           // adjust bias
+            }
+            writeToFile(theta_orig); // write adjusted weights to file
+
             // Classification accuracy
             vector<double> yTrue;
-            for (auto &s : testD.target) yTrue.push_back(toDouble(s));
+            for (auto &s : testD.target)
+                yTrue.push_back(toDouble(s));
             // Round probabilities at 0.5
             vector<double> yPred;
-            for (double p : preds) yPred.push_back(p > 0.5 ? 1.0 : 0.0);
+            for (double p : preds)
+                yPred.push_back(p > 0.5 ? 1.0 : 0.0);
             accuracy = computeAccuracy(yTrue, yPred);
             // llerror = computeLogLoss(testD, preds);
             precision = computePrecision(yTrue, yPred);
             recall = computeRecall(yTrue, yPred);
             f1 = computeF1Score(yTrue, yPred);
         }
-        else if (modelName == "linear_regression") {
+        else if (modelName == "linear_regression")
+        {
+            vector<double> theta = static_cast<LogisticRegression *>(model)->theta;
+            
+            int n = theta.size() -1;
+            vector<double> theta_orig(n+1);
+
+            theta_orig[0] = theta[0]; // start with bias
+            vector<double> mu(n), sigma(n);
+            compute_mu_sigma(d.features, mu, sigma); // compute mu & sigma
+            for (int i = 0; i < n; ++i) {
+                theta_orig[i + 1] = theta[i + 1] / sigma[i];                  // adjust weights
+                theta_orig[0] -= (theta[i + 1] * mu[i]) / sigma[i];           // adjust bias
+            }
+            writeToFile(theta_orig); // write adjusted weights to file
+
             // Regression: compute R^2 = 1 - SSE/SST
-            writeToFile(static_cast<LinearRegression*>(model)->theta);
             vector<double> yTrue;
-            for (auto &s : testD.target) yTrue.push_back(toDouble(s));
+            for (auto &s : testD.target)
+                yTrue.push_back(toDouble(s));
             double meanY = accumulate(yTrue.begin(), yTrue.end(), 0.0) / yTrue.size();
             double ssTot = 0.0, ssRes = 0.0;
-            for (size_t i=0; i<yTrue.size(); ++i) {
-                ssTot += (yTrue[i] - meanY)*(yTrue[i] - meanY);
-                ssRes += (yTrue[i] - preds[i])*(yTrue[i] - preds[i]);
+            for (size_t i = 0; i < yTrue.size(); ++i)
+            {
+                ssTot += (yTrue[i] - meanY) * (yTrue[i] - meanY);
+                ssRes += (yTrue[i] - preds[i]) * (yTrue[i] - preds[i]);
             }
-            r2 = 1.0 - ssRes/ssTot;
+            r2 = 1.0 - ssRes / ssTot;
             mse = computeMeanSquaredError(testD, preds);
         }
-        else if (modelName == "knn") {
+        else if (modelName == "knn")
+        {
+            writeToFile(datasetFile);
             // KNN: accuracy is already computed above
             vector<double> yTrue;
-            for (auto &s : testD.target) yTrue.push_back(toDouble(s));
+            for (auto &s : testD.target)
+                yTrue.push_back(toDouble(s));
             accuracy = computeAccuracy(yTrue, preds);
             precision = computePrecision(yTrue, preds);
             recall = computeRecall(yTrue, preds);
             f1 = computeF1Score(yTrue, preds);
         }
-        else if (modelName == "svm") {
-            vector<double> p;
-            p.push_back(static_cast<SVM*>(model)->bias);
-            for(auto x:static_cast<SVM*>(model)->weights)
+        else if (modelName == "svm")
+        {
+            vector<double> theta;
+            theta.push_back(static_cast<SVM *>(model)->bias);
+            for (auto x : static_cast<SVM *>(model)->weights)
             {
-                p.push_back(x);
+                theta.push_back(x);
             }
+        
+            int n = theta.size() -1;
+            vector<double> theta_orig(n+1);
 
-            writeToFile(p);
+            theta_orig[0] = theta[0]; // start with bias
+            vector<double> mu(n), sigma(n);
+            compute_mu_sigma(d.features, mu, sigma); // compute mu & sigma
+            for (int i = 0; i < n; ++i) {
+                theta_orig[i + 1] = theta[i + 1] / sigma[i];                  // adjust weights
+                theta_orig[0] -= (theta[i + 1] * mu[i]) / sigma[i];           // adjust bias
+            }
+            writeToFile(theta_orig); // write adjusted weights to file
+
             // SVM: accuracy is already computed above
             vector<double> yTrue;
-            for (auto &s : testD.target) yTrue.push_back(toDouble(s));
+            for (auto &s : testD.target)
+                yTrue.push_back(toDouble(s));
             accuracy = computeAccuracy(yTrue, preds);
             precision = computePrecision(yTrue, preds);
             recall = computeRecall(yTrue, preds);
             f1 = computeF1Score(yTrue, preds);
         }
-        else if (modelName == "k_means_clustering") {
+        else if (modelName == "k_means_clustering")
+        {
 
-            writeToFile(static_cast<KMeans*>(model)->centroids);
+            writeToFile(static_cast<KMeans *>(model)->centroids);
 
-            vector<int> assignments = static_cast<KMeans*>(model)->getAssignments();
-            const auto& centroids = static_cast<KMeans*>(model)->getCentroids();
-        
-            for (size_t i = 0; i < testD.features.size(); ++i) {
+            vector<int> assignments = static_cast<KMeans *>(model)->getAssignments();
+            const auto &centroids = static_cast<KMeans *>(model)->getCentroids();
+
+            for (size_t i = 0; i < testD.features.size(); ++i)
+            {
                 int cluster = assignments[i];
                 double dist = 0.0;
-                for (size_t j = 0; j < testD.features[i].size(); ++j) {
+                for (size_t j = 0; j < testD.features[i].size(); ++j)
+                {
                     double diff = toDouble(testD.features[i][j]) - centroids[cluster][j];
                     dist += diff * diff;
                 }
                 inertia += dist;
             }
         }
-        else if(modelName == "decision_tree"){
+        else if (modelName == "decision_tree")
+        {
             vector<double> yTrue;
-            for (auto &s : testD.target) yTrue.push_back(toDouble(s));
+            for (auto &s : testD.target)
+                yTrue.push_back(toDouble(s));
             accuracy = computeAccuracy(yTrue, preds);
             precision = computePrecision(yTrue, preds);
             recall = computeRecall(yTrue, preds);
@@ -299,25 +459,27 @@ int main(int argc, char** argv) {
         // 7) Write JSON to metrics.json
         ofstream js("metrics.json");
         js << "{\n";
-        js << "  \"time_ms\": "   << time_ms    << ",\n";
+        js << "  \"time_ms\": " << time_ms << ",\n";
         js << "  \"memory_kb\": " << peakRSS_kb << ",\n";
 
-        if (modelName == "k_means_clustering") {
+        if (modelName == "k_means_clustering")
+        {
             js << "  \"inertia\": " << inertia << ",\n";
-        } 
-        else if (modelName == "linear_regression") {
-            js << "  \"r2\": "  << r2*100   << ",\n";
-            js << "  \"mse\": "  << mse   << ",\n";
+        }
+        else if (modelName == "linear_regression")
+        {
+            js << "  \"r2\": " << r2 * 100 << ",\n";
+            js << "  \"mse\": " << mse << ",\n";
             // js << "  \"mse\": "       << mse            << "\n";
-        } 
-        else {
-            js << "  \"accuracy\": "  << accuracy*100   << ",\n";
-            js << "  \"precision\": " << precision*100  << ",\n";
-            js << "  \"recall\": "    << recall*100     << ",\n";
-            js << "  \"f1_score\": "  << f1*100         << ",\n";
+        }
+        else
+        {
+            js << "  \"accuracy\": " << accuracy * 100 << ",\n";
+            js << "  \"precision\": " << precision * 100 << ",\n";
+            js << "  \"recall\": " << recall * 100 << ",\n";
+            js << "  \"f1_score\": " << f1 * 100 << ",\n";
         }
 
-        // yaha pe change kiya hai dekh lena
         // Read the image file and encode it in base64
         string filename = "../imgs/graph.png";
         vector<unsigned char> image_data = read_file_binary(filename);
@@ -328,15 +490,15 @@ int main(int argc, char** argv) {
         js.close();
 
         // Cleanup
-        delete[] static_cast<double*>(rawTheta);
+        delete[] static_cast<double *>(rawTheta);
         delete model;
 
         cout << "Metrics written to metrics.json\n";
         return 0;
     }
-    catch (const exception &ex) {
+    catch (const exception &ex)
+    {
         cerr << "Error: " << ex.what() << "\n";
         return 1;
     }
-    
 }

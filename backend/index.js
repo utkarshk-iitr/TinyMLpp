@@ -67,7 +67,7 @@ app.post('/train', (req, res) => {
 				console.error(`Error output: ${stderr}`);
 				return res.status(500).send({ error: stderr });
 			}
-			// console.log(`Command output: ${stdout}`);
+			console.log(`Command output: ${stdout}`);
 
 			// Read and process the metrics.json file
 			readMetricsFile(path.join(__dirname, './metrics.json'), res, req);

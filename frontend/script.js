@@ -1,5 +1,7 @@
 // Initialize when document is loaded
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("TinyML dashboard initialized");
+
   initThemeToggle();
   initCurrentDate();
   initAlgorithmSelection();
@@ -116,7 +118,6 @@ function initRangeSliders() {
 // Initialize charts
 function initCharts() {
   initVisualizationChart();
-  initComparisonChart();
 }
 
 function initVisualizationChart() {
@@ -163,60 +164,6 @@ function initVisualizationChart() {
         },
         y: {
           beginAtZero: true,
-          grid: {
-            color: "rgba(0, 0, 0, 0.05)",
-          },
-        },
-      },
-      plugins: {
-        legend: {
-          position: "top",
-        },
-      },
-    },
-  });
-}
-
-function initComparisonChart() {
-  const ctx = document.getElementById("comparison-chart");
-  if (!ctx) return;
-
-  new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Training Time", "Memory Usage", "Accuracy"],
-      datasets: [
-        {
-          label: "C++",
-          data: [0.8, 2.5, 95],
-          backgroundColor: "rgba(91, 134, 229, 0.6)",
-          borderColor: "rgba(91, 134, 229, 1)",
-          borderWidth: 1,
-        },
-        {
-          label: "Python",
-          data: [2.3, 4.6, 93],
-          backgroundColor: "rgba(246, 173, 85, 0.6)",
-          borderColor: "rgba(246, 173, 85, 1)",
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 1000,
-        easing: "easeOutQuart",
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: "rgba(0, 0, 0, 0.05)",
-          },
-        },
-        x: {
           grid: {
             color: "rgba(0, 0, 0, 0.05)",
           },
@@ -374,36 +321,6 @@ function updateParameterForm(algorithm) {
   }, 10);
 }
 
-// Plot type switching
-document.addEventListener("click", (e) => {
-  if (e.target.closest(".plot-btn")) {
-    const btn = e.target.closest(".plot-btn");
-    const plotType = btn.getAttribute("data-plot");
-
-    // Remove active class from all plot buttons
-    document
-      .querySelectorAll(".plot-btn")
-      .forEach((b) => b.classList.remove("active"));
-
-    // Add active class to clicked button
-    btn.classList.add("active");
-
-    // Change plot type (in a real app, you would update the chart)
-    updatePlotType(plotType);
-  }
-});
-
-// Update plot type (simplified version)
-function updatePlotType(type) {
-  const chart = Chart.getChart("visualization-chart");
-  if (!chart) return;
-
-  // In a real app, you would have more complex chart updating logic
-  chart.config.type =
-    type === "bar" ? "bar" : type === "line" ? "line" : "scatter";
-  chart.update();
-}
-
 // Animation for the entire page
 function initAnimations() {
   // Animate progress bars on scroll
@@ -512,17 +429,9 @@ function simulateTraining() {
 // Modify the simulatePrediction function to send features to backend
 function simulatePrediction() {
   const predictionResult = document.getElementById("prediction-result");
-  const confidenceFill = document.getElementById("confidence-fill");
-  const confidenceValue = document.getElementById("confidence-value");
   const predictionValue = document.getElementById("prediction-value");
 
-  if (
-    !predictionResult ||
-    !confidenceFill ||
-    !confidenceValue ||
-    !predictionValue
-  )
-    return;
+  if (!predictionResult || !predictionValue) return;
 
   // Add loading class to predict button
   const predictBtn = document.getElementById("predict-btn");
@@ -659,6 +568,12 @@ function initTrainingWorkflow() {
 
   let selectedAlgorithm = null;
   const trainingHistory = [];
+
+  // Clear the history list initially
+  const historyList = document.querySelector(".history-list");
+  if (historyList) {
+    historyList.innerHTML = '';
+  }
 
   // Algorithm selection
   algorithmCards.forEach((card) => {
@@ -1001,6 +916,9 @@ function initTrainingWorkflow() {
 
       // Update history section
       updateTrainingHistory(trainingHistory);
+
+      // Don't try to update performance comparison since we removed it
+      // updatePerformanceComparison(processedMetrics);
 
       showNotification("Model trained successfully!", "success");
     } catch (error) {
@@ -1366,9 +1284,6 @@ function initTrainingWorkflow() {
                     <div class="history-actions">
                         <button class="action-btn" onclick="showModelDetails(${index})">
                             <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn">
-                            <i class="fas fa-download"></i>
                         </button>
                     </div>
                 </div>
@@ -1968,13 +1883,8 @@ function updatePredictionFeatures(algorithm, metrics, datasetInfo) {
 
   // Reset prediction result
   const predictionValue = document.getElementById("prediction-value");
-  const confidenceFill = document.getElementById("confidence-fill");
-  const confidenceValue = document.getElementById("confidence-value");
-
-  if (predictionValue && confidenceFill && confidenceValue) {
+  if (predictionValue) {
     predictionValue.textContent = "--";
-    confidenceFill.style.width = "0%";
-    confidenceValue.textContent = "--";
   }
 
   // If we have dataset information, create input fields

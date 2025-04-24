@@ -63,7 +63,7 @@ app.post('/train', (req, res) => {
 				console.error(`Error executing command: ${error.message}`);
 				return res.status(500).send({ error: error.message });
 			}
-			if (stderr) {
+			if (stderr && error) {
 				console.error(`Error output: ${stderr}`);
 				return res.status(500).send({ error: stderr });
 			}

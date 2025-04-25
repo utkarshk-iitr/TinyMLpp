@@ -1,5 +1,21 @@
 # TinyMLpp
 
+## Prerequisites
+
+Ensure you have the following installed to enable graph plotting and testing:
+
+1. **g++**: A C++ compiler supporting C++17 standard.
+2. **gnuplot**: A linux native application used to plot graph. 
+
+You can install the prerequisites using the following commands:
+
+```bash
+sudo apt update
+sudo apt install libboost-iostreams-dev libboost-system-dev gnuplot libgnuplot-iostream-dev
+```
+
+Once the prerequisites are installed, you can compile and run the project as described below.
+
 ## Running the Project
 Although we have a fully working website you don't need to write to any sort of commands, GUI just works perfectly. 
 
@@ -24,22 +40,6 @@ g++ ./predict.cpp ../src/logistic_regression.cpp ../src/linear_regression.cpp ..
 ```
 
 **Note**: The above command works only for Linux. For Windows, replace the file paths with the appropriate paths on your system after installing the required dependencies.
-
-## Prerequisites
-
-Ensure you have the following installed to enable graph plotting and testing:
-
-1. **g++**: A C++ compiler supporting C++17 standard.
-2. **gnuplot**: A linux native application used to plot graph. 
-
-You can install the prerequisites using the following commands:
-
-```bash
-sudo apt update
-sudo apt install libboost-iostreams-dev libboost-system-dev gnuplot libgnuplot-iostream-dev
-```
-
-Once the prerequisites are installed, you can compile and run the project as described above.
 
 ## Project Progress
 

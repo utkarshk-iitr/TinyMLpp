@@ -17,7 +17,7 @@ sudo apt install libboost-iostreams-dev libboost-system-dev gnuplot libgnuplot-i
 Once the prerequisites are installed, you can compile and run the project as described below.
 
 ## Running the Project
-Although we have a fully working website you don't need to write to any sort of commands, GUI just works perfectly. 
+We have a fully working website with GUI just working perfectly. 
 
 Starting backend, navigate to backend directory then type
 ```bash
@@ -25,7 +25,7 @@ npm i
 node index.js
 ```
 
-For extra enthusiastic people, to run the project, use the following command:
+To run the project, use the following command:
 
 ```bash
 g++ ./test/linear_regression_test.cpp ./src/linear_regression.cpp ./src/data_handling.cpp -o tinymlpp -std=c++17 -lboost_iostreams -lboost_system && ./tinymlpp

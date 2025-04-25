@@ -1,27 +1,38 @@
 # TinyMLpp
 
+GitHub Repository:
+```bash
+https://github.com/utkarshk-iitr/TinyMLpp/
+```
+
+TinyMLpp is a lightweight, header-only C++17 machine learning library designed for fast experimentation and performance benchmarking. It includes clean implementations of several core ML algorithms and integrates graph plotting using Gnuplot. Additionally, it features a full-stack web interface for an interactive experience.
+
 ## Prerequisites
+Before running the project, ensure the following dependencies are installed:
 
-Ensure you have the following installed to enable graph plotting and testing:
+Required Packages
+1. **g++**: C++ compiler with support for the C++17 standard.
 
-1. **g++**: A C++ compiler supporting C++17 standard.
-2. **gnuplot**: A linux native application used to plot graph. 
+2. **Gnuplot**: A Linux-native plotting utility for graph visualization.
 
-You can install the prerequisites using the following commands:
+3. **Boost Libraries**: Specifically libboost-iostreams-dev and libboost-system-dev.
+
+Install with APT (Debian/Ubuntu-based systems):
 
 ```bash
 sudo apt update
 sudo apt install libboost-iostreams-dev libboost-system-dev gnuplot libgnuplot-iostream-dev
 ```
 
-Once the prerequisites are installed, you can compile and run the project as described below.
+Running the Project
+Backend (Node.js)
+We also built a complete backend with an interactive frontend.
 
-## Running the Project
-We have a fully working website with GUI just working perfectly. 
+To start the backend server:
 
-Starting backend, navigate to backend directory then type
 ```bash
-npm i
+cd backend
+npm install
 node index.js
 ```
 
@@ -41,25 +52,42 @@ g++ ./predict.cpp ../src/logistic_regression.cpp ../src/linear_regression.cpp ..
 
 **Note**: The above command works only for Linux. For Windows, replace the file paths with the appropriate paths on your system after installing the required dependencies.
 
-## Project Progress
+## Project Features & Progress
+
+### Completed Core Features
+- Fully functional frontend and backend built using Node.js
+- Performance-optimized algorithms
+- Benchmarking of each algorithm
+- Graph plotting using Gnuplot for model insights and diagnostics
+
+### Machine Learning Algorithms Implemented
+- Linear Regression
+- Logistic Regression
+- K-Nearest Neighbors (KNN)
+- K-Means Clustering
+- Decision Tree Classifier
+- Support Vector Machine (SVM)
 
 ### Test Coverage
+Each algorithm has been thoroughly tested for correctness, performance, and visual output where applicable:
+
 - Linear Regression
 - K-Means Clustering
-- K-Nearest Neighbors (KNN)
+- K-Nearest Neighbors
 - Logistic Regression
 - Decision Tree
 - SVM
 
-### Core Algorithims Coded
-- Linear Regression
-- K-Means Clustering
-- K-Nearest Neighbors (KNN)
-- Logistic Regression
-- Decision Tree
-- SVM
+### Web Interface
+Our web interface offers a clean, interactive way to run and visualize ML algorithms directly in the browser. The frontend connects seamlessly with the backend and supports:
 
-### Task Completed
-- Maded a fully working website with a stunning frontend and backend using Node js. 
-- Optimize the performance of the algorithms.
-- Benchmark the algorithms. 
+- Uploading datasets
+- Running ML models
+- Viewing visual results and benchmarks
+
+
+### Planned enhancements include:
+- Adding more advanced ML algorithms (e.g., Random Forest, PCA)
+- Creating a downloadable binary package for easier installation
+- Making the project fully cross-platform (Windows/MacOS/Linux)
+- Improving test coverage and adding unit tests
